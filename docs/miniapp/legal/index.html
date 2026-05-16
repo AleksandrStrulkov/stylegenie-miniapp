@@ -86,7 +86,7 @@
         if (custom) {
           return custom + (custom.indexOf("?") >= 0 ? "&" : "?") + "_=" + Date.now();
         }
-        return "../../documents/puplic_offer.txt?_=" + Date.now();
+        return "../../documents/public_offer.txt?_=" + Date.now();
       }
 
       function loadFromTxt(url) {
@@ -123,7 +123,7 @@
 
       if (onGithubPages || forcePages) {
         loadFromTxt(githubPagesTxtUrl()).catch(function () {
-          showError("Не удалось загрузить документ. Проверьте, что файл docs/documents/puplic_offer.txt опубликован на GitHub Pages.");
+          showError("Не удалось загрузить документ. Проверьте, что файл docs/documents/public_offer.txt опубликован на GitHub Pages.");
         });
         return;
       }
