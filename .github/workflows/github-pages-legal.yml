@@ -1,5 +1,5 @@
-# Публикация Mini App (/terms, /privacy) и docs/documents/puplic_offer.txt на GitHub Pages.
-# В репозитории: Settings → Pages → Source: GitHub Actions (не «Deploy from a branch»).
+# Публикация Mini App (/terms, /privacy) и docs/documents/public_offer.txt на GitHub Pages.
+# В репозитории: Settings → Pages → Source: GitHub Actions.
 name: Deploy legal docs to GitHub Pages
 
 on:
@@ -30,10 +30,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Sync miniapp HTML into docs
+      # В репозитории только docs/ (без miniapp/ в корне) — шаг пропускается.
+      - name: Sync miniapp HTML into docs (if present)
         run: |
-          mkdir -p docs/miniapp/legal
-          cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
+          if [ -f miniapp/legal/index.html ]; then
+            mkdir -p docs/miniapp/legal
+            cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
+            echo "Synced from miniapp/legal/index.html"
+          else
+            echo "No miniapp/legal/index.html in repo root — using docs/miniapp/legal/index.html as-is"
+          fi
+          test -f docs/miniapp/legal/index.html || (echo "Missing docs/miniapp/legal/index.html" && exit 1)
+          test -f docs/documents/public_offer.txt || (echo "Missing docs/documents/public_offer.txt" && exit 1)
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
