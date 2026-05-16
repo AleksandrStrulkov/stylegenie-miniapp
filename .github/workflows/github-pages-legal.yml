@@ -1,0 +1,45 @@
+# Публикация Mini App (/terms, /privacy) и docs/documents/puplic_offer.txt на GitHub Pages.
+# В репозитории: Settings → Pages → Source: GitHub Actions (не «Deploy from a branch»).
+name: Deploy legal docs to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/**"
+      - "miniapp/legal/**"
+      - ".github/workflows/github-pages-legal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-legal
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync miniapp HTML into docs
+        run: |
+          mkdir -p docs/miniapp/legal
+          cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

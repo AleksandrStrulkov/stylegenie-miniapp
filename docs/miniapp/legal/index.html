@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Документ</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: var(--tg-theme-bg-color, #ffffff);
+      --text: var(--tg-theme-text-color, #1a1a1a);
+      --hint: var(--tg-theme-hint-color, #6b7280);
+      --link: var(--tg-theme-link-color, #2481cc);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 15px;
+      padding: 12px 16px calc(24px + env(safe-area-inset-bottom, 0));
+    }
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 0 0 8px;
+      line-height: 1.35;
+    }
+    .meta {
+      font-size: 0.8rem;
+      color: var(--hint);
+      margin-bottom: 16px;
+    }
+    #content {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    #content.loading { color: var(--hint); }
+    #content.error { color: #c0392b; }
+    a { color: var(--link); }
+  </style>
+</head>
+<body>
+  <h1 id="title">Документ</h1>
+  <p class="meta" id="meta"></p>
+  <article id="content" class="loading">Загрузка…</article>
+  <script>
+    (function () {
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (tg) {
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor("secondary_bg_color");
+      }
+
+      const TITLES = {
+        terms: "Условия сервиса",
+        privacy: "Обработка персональных данных",
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const docType = params.get("doc") === "privacy" ? "privacy" : "terms";
+      const titleEl = document.getElementById("title");
+      const metaEl = document.getElementById("meta");
+      const contentEl = document.getElementById("content");
+
+      titleEl.textContent = TITLES[docType] || TITLES.terms;
+
+      function showText(body, metaLine) {
+        contentEl.classList.remove("loading", "error");
+        contentEl.textContent = body || "";
+        metaEl.textContent = metaLine || "";
+      }
+
+      function showError(msg) {
+        contentEl.classList.remove("loading");
+        contentEl.classList.add("error");
+        contentEl.textContent = msg;
+      }
+
+      /** Путь к .txt на GitHub Pages (папка /docs в репозитории). */
+      function githubPagesTxtUrl() {
+        const custom = params.get("txt");
+        if (custom) {
+          return custom + (custom.indexOf("?") >= 0 ? "&" : "?") + "_=" + Date.now();
+        }
+        return "../../documents/puplic_offer.txt?_=" + Date.now();
+      }
+
+      function loadFromTxt(url) {
+        return fetch(url, { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("txt HTTP " + res.status);
+            return res.text();
+          })
+          .then(function (text) {
+            showText(text, "Документ с GitHub Pages");
+          });
+      }
+
+      function loadFromApi() {
+        return fetch("/api/legal/document?_=" + Date.now(), { cache: "no-store" })
+          .then(function (res) {
+            if (!res.ok) throw new Error("api HTTP " + res.status);
+            return res.json();
+          })
+          .then(function (data) {
+            var meta = "";
+            if (data.updated_at) {
+              try {
+                meta = "Обновлено: " + new Date(data.updated_at).toLocaleString("ru-RU");
+              } catch (e) { /* ignore */ }
+            }
+            showText(data.body, meta);
+          });
+      }
+
+      var host = window.location.hostname || "";
+      var onGithubPages = host.endsWith(".github.io");
+      var forcePages = params.get("source") === "pages";
+
+      if (onGithubPages || forcePages) {
+        loadFromTxt(githubPagesTxtUrl()).catch(function () {
+          showError("Не удалось загрузить документ. Проверьте, что файл docs/documents/puplic_offer.txt опубликован на GitHub Pages.");
+        });
+        return;
+      }
+
+      loadFromApi().catch(function () {
+        loadFromTxt(githubPagesTxtUrl()).catch(function () {
+          showError("Не удалось загрузить документ. Попробуйте позже.");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
