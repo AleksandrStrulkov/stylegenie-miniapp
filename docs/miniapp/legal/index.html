@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Документ</title>
+  <title>Условия сервиса</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -22,16 +22,16 @@
       font-size: 15px;
       padding: 12px 16px calc(24px + env(safe-area-inset-bottom, 0));
     }
-    h1 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin: 0 0 8px;
-      line-height: 1.35;
+    #title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 16px;
+      line-height: 1.4;
     }
-    .meta {
-      font-size: 0.8rem;
-      color: var(--hint);
-      margin-bottom: 16px;
+    #title .doc-subtitle {
+      display: block;
+      font-weight: 700;
+      margin-top: 4px;
     }
     #content {
       white-space: pre-wrap;
@@ -43,8 +43,7 @@
   </style>
 </head>
 <body>
-  <h1 id="title">Документ</h1>
-  <p class="meta" id="meta"></p>
+  <h1 id="title" hidden></h1>
   <article id="content" class="loading">Загрузка…</article>
   <script>
     (function () {
@@ -55,32 +54,58 @@
         tg.setHeaderColor("secondary_bg_color");
       }
 
-      const TITLES = {
-        terms: "Условия сервиса",
-        privacy: "Обработка персональных данных",
-      };
-
       const params = new URLSearchParams(window.location.search);
-      const docType = params.get("doc") === "privacy" ? "privacy" : "terms";
       const titleEl = document.getElementById("title");
-      const metaEl = document.getElementById("meta");
       const contentEl = document.getElementById("content");
 
-      titleEl.textContent = TITLES[docType] || TITLES.terms;
+      function parseDocument(text) {
+        const lines = String(text || "").replace(/\r\n/g, "\n").split("\n");
+        let i = 0;
+        while (i < lines.length && !lines[i].trim()) i++;
+        const titleMain = (lines[i++] || "").trim();
+        while (i < lines.length && !lines[i].trim()) i++;
+        let titleSub = "";
+        if (i < lines.length) {
+          const candidate = lines[i].trim();
+          if (candidate.charAt(0) === "(") {
+            titleSub = candidate;
+            i++;
+          }
+        }
+        while (i < lines.length && !lines[i].trim()) i++;
+        const body = lines.slice(i).join("\n").trim();
+        return { titleMain: titleMain, titleSub: titleSub, body: body };
+      }
 
-      function showText(body, metaLine) {
+      function renderDocument(text) {
+        const parsed = parseDocument(text);
         contentEl.classList.remove("loading", "error");
-        contentEl.textContent = body || "";
-        metaEl.textContent = metaLine || "";
+
+        if (parsed.titleMain) {
+          titleEl.hidden = false;
+          titleEl.textContent = "";
+          titleEl.appendChild(document.createTextNode(parsed.titleMain));
+          if (parsed.titleSub) {
+            const sub = document.createElement("span");
+            sub.className = "doc-subtitle";
+            sub.textContent = parsed.titleSub;
+            titleEl.appendChild(sub);
+          }
+          document.title = parsed.titleMain;
+        } else {
+          titleEl.hidden = true;
+        }
+
+        contentEl.textContent = parsed.body || "";
       }
 
       function showError(msg) {
+        titleEl.hidden = true;
         contentEl.classList.remove("loading");
         contentEl.classList.add("error");
         contentEl.textContent = msg;
       }
 
-      /** Путь к .txt на GitHub Pages (папка /docs в репозитории). */
       function githubPagesTxtUrl() {
         const custom = params.get("txt");
         if (custom) {
@@ -95,9 +120,7 @@
             if (!res.ok) throw new Error("txt HTTP " + res.status);
             return res.text();
           })
-          .then(function (text) {
-            showText(text, "Документ с GitHub Pages");
-          });
+          .then(renderDocument);
       }
 
       function loadFromApi() {
@@ -107,13 +130,7 @@
             return res.json();
           })
           .then(function (data) {
-            var meta = "";
-            if (data.updated_at) {
-              try {
-                meta = "Обновлено: " + new Date(data.updated_at).toLocaleString("ru-RU");
-              } catch (e) { /* ignore */ }
-            }
-            showText(data.body, meta);
+            renderDocument(data.body || "");
           });
       }
 
