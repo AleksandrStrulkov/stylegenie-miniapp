@@ -8,6 +8,7 @@ on:
     paths:
       - "docs/**"
       - "miniapp/legal/**"
+      - "miniapp/gallery/**"
       - ".github/workflows/github-pages-legal.yml"
   workflow_dispatch:
 
@@ -40,7 +41,15 @@ jobs:
           else
             echo "No miniapp/legal/index.html in repo root — using docs/miniapp/legal/index.html as-is"
           fi
+          if [ -f miniapp/gallery/index.html ]; then
+            mkdir -p docs/miniapp/gallery
+            cp -f miniapp/gallery/index.html docs/miniapp/gallery/index.html
+            echo "Synced from miniapp/gallery/index.html"
+          else
+            echo "No miniapp/gallery/index.html — using docs/miniapp/gallery/index.html as-is"
+          fi
           test -f docs/miniapp/legal/index.html || (echo "Missing docs/miniapp/legal/index.html" && exit 1)
+          test -f docs/miniapp/gallery/index.html || (echo "Missing docs/miniapp/gallery/index.html" && exit 1)
           test -f docs/documents/public_offer.txt || (echo "Missing docs/documents/public_offer.txt" && exit 1)
 
       - name: Upload Pages artifact
