@@ -1,5 +1,5 @@
 # Публикация юридических документов и Mini App legal на GitHub Pages.
-# Один HTML (docs/miniapp/legal/index.html) + три .txt; документ выбирается ?doc=terms|privacy|consent
+# Один HTML (docs/miniapp/legal/index.html) + три .md; документ выбирается ?doc=terms|privacy|consent
 #
 # В репозитории: Settings → Pages → Source: GitHub Actions
 # WEBAPP_BASE_URL в боте: https://<user>.github.io/<repo>/miniapp/legal/
@@ -59,14 +59,14 @@ jobs:
             echo "Missing docs/miniapp/legal/index.html"
             exit 1
           )
-          for f in public_offer.txt policy_personal.txt consent_personal.txt; do
+          for f in public_offer.md policy_personal.md consent_personal.md; do
             test -f "docs/documents/$f" || (
               echo "Missing docs/documents/$f"
               exit 1
             )
           done
           echo "Legal documents OK:"
-          ls -la docs/documents/*.txt
+          ls -la docs/documents/*.md
           echo "Mini App legal: docs/miniapp/legal/index.html"
 
       - name: Upload Pages artifact
