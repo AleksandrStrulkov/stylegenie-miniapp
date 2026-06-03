@@ -106,12 +106,20 @@
         contentEl.textContent = msg;
       }
 
+      var docKind = (params.get("doc") || "terms").toLowerCase();
+      var DOC_TXT = {
+        terms: "../../documents/public_offer.txt",
+        privacy: "../../documents/policy_personal.txt",
+        consent: "../../documents/consent_personal.txt"
+      };
+
       function githubPagesTxtUrl() {
         const custom = params.get("txt");
         if (custom) {
           return custom + (custom.indexOf("?") >= 0 ? "&" : "?") + "_=" + Date.now();
         }
-        return "../../documents/public_offer.txt?_=" + Date.now();
+        var path = DOC_TXT[docKind] || DOC_TXT.terms;
+        return path + "?_=" + Date.now();
       }
 
       function loadFromTxt(url) {
@@ -124,7 +132,8 @@
       }
 
       function loadFromApi() {
-        return fetch("/api/legal/document?_=" + Date.now(), { cache: "no-store" })
+        var apiUrl = "/api/legal/document?doc=" + encodeURIComponent(docKind) + "&_=" + Date.now();
+        return fetch(apiUrl, { cache: "no-store" })
           .then(function (res) {
             if (!res.ok) throw new Error("api HTTP " + res.status);
             return res.json();
@@ -140,7 +149,7 @@
 
       if (onGithubPages || forcePages) {
         loadFromTxt(githubPagesTxtUrl()).catch(function () {
-          showError("Не удалось загрузить документ. Проверьте, что файл docs/documents/public_offer.txt опубликован на GitHub Pages.");
+          showError("Не удалось загрузить документ. Проверьте, что файлы в docs/documents/ опубликованы на GitHub Pages.");
         });
         return;
       }

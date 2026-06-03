@@ -1,13 +1,19 @@
-# Публикация Mini App (/terms, /privacy) и docs/documents/public_offer.txt на GitHub Pages.
-# В репозитории: Settings → Pages → Source: GitHub Actions.
+# Публикация юридических документов и Mini App legal на GitHub Pages.
+# Один HTML (docs/miniapp/legal/index.html) + три .txt; документ выбирается ?doc=terms|privacy|consent
+#
+# В репозитории: Settings → Pages → Source: GitHub Actions
+# WEBAPP_BASE_URL в боте: https://<user>.github.io/<repo>/miniapp/legal/
 name: Deploy legal docs to GitHub Pages
 
 on:
   push:
     branches: [main, master]
     paths:
-      - "docs/**"
+      - "docs/documents/**"
+      - "docs/miniapp/legal/**"
+      - "docs/.nojekyll"
       - "miniapp/legal/**"
+      - "docs/miniapp/gallery/**"
       - "miniapp/gallery/**"
       - ".github/workflows/github-pages-legal.yml"
   workflow_dispatch:
@@ -31,26 +37,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # В репозитории только docs/ (без miniapp/ в корне) — шаг пропускается.
-      - name: Sync miniapp HTML into docs (if present)
+      - name: Sync miniapp HTML into docs (if present in repo root)
         run: |
+          set -e
           if [ -f miniapp/legal/index.html ]; then
             mkdir -p docs/miniapp/legal
             cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
-            echo "Synced from miniapp/legal/index.html"
-          else
-            echo "No miniapp/legal/index.html in repo root — using docs/miniapp/legal/index.html as-is"
+            echo "Synced miniapp/legal/index.html → docs/miniapp/legal/"
           fi
           if [ -f miniapp/gallery/index.html ]; then
             mkdir -p docs/miniapp/gallery
             cp -f miniapp/gallery/index.html docs/miniapp/gallery/index.html
-            echo "Synced from miniapp/gallery/index.html"
-          else
-            echo "No miniapp/gallery/index.html — using docs/miniapp/gallery/index.html as-is"
+            echo "Synced miniapp/gallery/index.html → docs/miniapp/gallery/"
           fi
-          test -f docs/miniapp/legal/index.html || (echo "Missing docs/miniapp/legal/index.html" && exit 1)
-          test -f docs/miniapp/gallery/index.html || (echo "Missing docs/miniapp/gallery/index.html" && exit 1)
-          test -f docs/documents/public_offer.txt || (echo "Missing docs/documents/public_offer.txt" && exit 1)
+
+      - name: Verify legal Pages artifact
+        run: |
+          set -e
+          test -f docs/.nojekyll || touch docs/.nojekyll
+          test -f docs/miniapp/legal/index.html || (
+            echo "Missing docs/miniapp/legal/index.html"
+            exit 1
+          )
+          for f in public_offer.txt policy_personal.txt consent_personal.txt; do
+            test -f "docs/documents/$f" || (
+              echo "Missing docs/documents/$f"
+              exit 1
+            )
+          done
+          echo "Legal documents OK:"
+          ls -la docs/documents/*.txt
+          echo "Mini App legal: docs/miniapp/legal/index.html"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
