@@ -4,54 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>StyleGenie</title>
+  <link rel="stylesheet" href="miniapp/miniapp.css">
   <script src="https://st.max.ru/js/max-web-app.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      color: #6b7280;
-      background: #fff;
-    }
-  </style>
+  <script src="miniapp/vendor/marked.min.js"></script>
+  <script src="miniapp/vendor/purify.min.js"></script>
+  <script src="miniapp/miniapp.js"></script>
 </head>
 <body>
-  <p>Загрузка…</p>
+  <article id="content" class="loading">Загрузка…</article>
   <script>
     (function () {
-      var ROUTES = {
-        "legal:terms": "miniapp/legal/?doc=terms",
-        "legal:privacy": "miniapp/legal/?doc=privacy",
-        "legal:consent": "miniapp/legal/?doc=consent",
-        "models": "miniapp/models/",
-        "quality": "miniapp/quality/",
-        "gallery": "miniapp/gallery/"
-      };
-
-      function readStartParam() {
-        try {
-          if (window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.start_param) {
-            return String(window.WebApp.initDataUnsafe.start_param).trim();
-          }
-        } catch (e) { /* ignore */ }
-        try {
-          var tg = window.Telegram && window.Telegram.WebApp;
-          if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-            return String(tg.initDataUnsafe.start_param).trim();
-          }
-        } catch (e2) { /* ignore */ }
-        var params = new URLSearchParams(window.location.search);
-        return (params.get("route") || params.get("startapp") || "").trim();
-      }
-
-      var route = readStartParam();
-      var target = ROUTES[route] || "miniapp/legal/?doc=terms";
-      var base = window.location.href.replace(/[#?].*$/, "").replace(/\/$/, "");
-      window.location.replace(base + "/" + target);
+      var el = document.getElementById("content");
+      StyleGenieMiniApp.bootRootApp(el);
     })();
   </script>
 </body>
