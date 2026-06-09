@@ -41,6 +41,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -48,8 +50,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Build Mini App HTML bundle
-        run: uv run --with markdown python scripts/build_miniapp_bundle.py
+        run: |
+          python -m pip install --disable-pip-version-check markdown
+          python scripts/build_miniapp_bundle.py
 
       - name: Sync miniapp HTML into docs (if present in repo root)
         run: |
