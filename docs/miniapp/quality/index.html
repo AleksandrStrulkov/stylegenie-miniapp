@@ -4,63 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Качество генерации</title>
+  <link rel="stylesheet" href="../miniapp.css">
+  <script src="https://st.max.ru/js/max-web-app.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
-  <style>
-    :root {
-      --bg: var(--tg-theme-bg-color, #ffffff);
-      --text: var(--tg-theme-text-color, #1a1a1a);
-      --hint: var(--tg-theme-hint-color, #6b7280);
-      --link: var(--tg-theme-link-color, #2481cc);
-      --border: color-mix(in srgb, var(--text) 12%, transparent);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      font-size: 15px;
-      padding: 12px 16px calc(28px + env(safe-area-inset-bottom, 0));
-    }
-    #content.loading { color: var(--hint); }
-    #content.error { color: #c0392b; }
-    #content.guide-md h1 { font-size: 1.25rem; margin: 0 0 0.75rem; }
-    #content.guide-md h2 {
-      font-size: 1.05rem;
-      margin: 1.25rem 0 0.5rem;
-      padding-top: 0.25rem;
-      border-top: 1px solid var(--border);
-    }
-    #content.guide-md h2:first-of-type { border-top: none; padding-top: 0; }
-    #content.guide-md p { margin: 0.5rem 0 0.75rem; }
-    #content.guide-md strong { font-weight: 700; }
-  </style>
+  <script src="../embedded_html.js?v=3"></script>
+  <script src="../miniapp.runtime.js?v=3"></script>
 </head>
 <body>
   <article id="content" class="loading">Загрузка…</article>
   <script>
-    (function () {
-      var tg = window.Telegram && window.Telegram.WebApp;
-      if (tg) { tg.ready(); tg.expand(); }
-      var contentEl = document.getElementById("content");
-      var mdPath = "../../documents/quality_guide.md?_=" + Date.now();
-      marked.setOptions({ gfm: true, breaks: true, headerIds: false, mangle: false });
-      fetch(mdPath, { cache: "no-store" })
-        .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
-        .then(function (text) {
-          contentEl.className = "guide-md";
-          contentEl.innerHTML = DOMPurify.sanitize(marked.parse(text), { USE_PROFILES: { html: true } });
-          var h1 = contentEl.querySelector("h1");
-          if (h1) document.title = h1.textContent.trim();
-        })
-        .catch(function () {
-          contentEl.className = "error";
-          contentEl.textContent = "Не удалось загрузить справку по качеству.";
-        });
-    })();
+    StyleGenieMiniApp.bootDirectRoute(document.getElementById("content"), "quality");
   </script>
 </body>
 </html>

@@ -15,7 +15,9 @@ on:
       - "docs/miniapp/legal/**"
       - "docs/miniapp/models/**"
       - "docs/miniapp/quality/**"
-      - "docs/miniapp/miniapp.js"
+      - "docs/miniapp/embedded_html.js"
+      - "docs/miniapp/miniapp.runtime.js"
+      - "scripts/build_miniapp_bundle.py"
       - "docs/miniapp/miniapp.css"
       - "docs/miniapp/vendor/**"
       - "docs/.nojekyll"
@@ -45,6 +47,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Build Mini App HTML bundle
+        run: uv run --with markdown python scripts/build_miniapp_bundle.py
 
       - name: Sync miniapp HTML into docs (if present in repo root)
         run: |
@@ -78,18 +83,15 @@ jobs:
             echo "Missing docs/miniapp/legal/index.html"
             exit 1
           )
-          test -f docs/miniapp/vendor/marked.min.js || (
-            echo "Missing docs/miniapp/vendor/marked.min.js"
+          test -f docs/miniapp/embedded_html.js || (
+            echo "Missing docs/miniapp/embedded_html.js — run scripts/build_miniapp_bundle.py"
             exit 1
           )
-          test -f docs/miniapp/vendor/purify.min.js || (
-            echo "Missing docs/miniapp/vendor/purify.min.js"
+          test -f docs/miniapp/miniapp.runtime.js || (
+            echo "Missing docs/miniapp/miniapp.runtime.js"
             exit 1
           )
-          test -f docs/miniapp/miniapp.js || (
-            echo "Missing docs/miniapp/miniapp.js"
-            exit 1
-          )
+          test -f docs/miniapp/vendor/marked.min.js || true
           for f in public_offer.md policy_personal.md consent_personal.md; do
             test -f "docs/documents/$f" || (
               echo "Missing docs/documents/$f"
