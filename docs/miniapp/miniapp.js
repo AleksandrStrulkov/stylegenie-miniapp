@@ -220,13 +220,17 @@
   }
 
   function docPathForRoute(route) {
-    if (route === "gallery") return null;
+    if (route === "gallery" || route === "dashboard") return null;
     return resolveRoute(route) || LEGAL_DOC_FILES.terms;
   }
 
   function loadRoute(el, route) {
     if (route === "gallery") {
       window.location.replace(absoluteAsset("miniapp/gallery/"));
+      return Promise.resolve();
+    }
+    if (route === "dashboard") {
+      window.location.replace(absoluteAsset("miniapp/dashboard/"));
       return Promise.resolve();
     }
     var docPath = docPathForRoute(route);
@@ -266,7 +270,7 @@
   /**
    * MAX иногда отдаёт initData/start_param с задержкой.
    * Пока initData не готов — только «Загрузка…» (без ложной ошибки и без оферты).
-   * initData без start_param — главная кнопка Mini App → оферта.
+   * initData без start_param — главная кнопка Mini App → дашборд.
    */
   function isInitDataReady() {
     try {
@@ -308,12 +312,12 @@
         return;
       }
       if (isInitDataReady() && !initDataHasStartParam()) {
-        applyRoute("legal:terms");
+        applyRoute("dashboard");
         return;
       }
       elapsed += interval;
       if (elapsed >= maxWait) {
-        applyRoute("legal:terms");
+        applyRoute("dashboard");
         return;
       }
       setTimeout(tick, interval);

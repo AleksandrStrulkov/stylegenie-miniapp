@@ -126,6 +126,14 @@
       global.location.replace(root + "miniapp/gallery/");
       return;
     }
+    if (route === "dashboard") {
+      var dashRoot = global.location.pathname.replace(/\/[^/]*$/, "/");
+      if (dashRoot.indexOf("/miniapp/") >= 0) {
+        dashRoot = dashRoot.slice(0, dashRoot.indexOf("/miniapp/") + 1);
+      }
+      global.location.replace(dashRoot + "miniapp/dashboard/");
+      return;
+    }
     var data = routes()[route];
     if (!data || !data.html) {
       showError(el, "Раздел не найден.", loadId);
@@ -172,8 +180,8 @@
   }
 
   /**
-   * MAX: start_param может прийти с задержкой — опрос до 12 с, без ранней оферты.
-   * Главная кнопка Mini App: initData готов, start_param в initData отсутствует → оферта.
+   * MAX: start_param может прийти с задержкой — опрос до 12 с.
+   * Главная кнопка Mini App: initData готов, start_param отсутствует → дашборд.
    */
   function bootRootApp(contentEl) {
     initBridge();
@@ -204,7 +212,7 @@
         elapsed >= 1500 &&
         !appliedRoute
       ) {
-        applyRoute("legal:terms");
+        applyRoute("dashboard");
       }
 
       elapsed += interval;
@@ -213,7 +221,7 @@
         return;
       }
       if (!appliedRoute) {
-        applyRoute("legal:terms");
+        applyRoute("dashboard");
       }
     }
 

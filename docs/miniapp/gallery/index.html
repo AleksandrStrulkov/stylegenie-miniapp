@@ -4,10 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Галерея работ</title>
+  <script src="https://st.max.ru/js/max-web-app.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: var(--tg-theme-bg-color, #0f0f12);
@@ -20,7 +18,7 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "DM Sans", system-ui, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding: 12px 14px calc(28px + env(safe-area-inset-bottom, 0));
@@ -28,21 +26,18 @@
     }
     header {
       text-align: center;
-      margin-bottom: 20px;
-      padding-top: 4px;
+      margin-bottom: 18px;
     }
     h1 {
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: 1.65rem;
+      font-size: 1.45rem;
       font-weight: 700;
       margin: 0 0 8px;
-      letter-spacing: -0.02em;
     }
     .subtitle {
       color: var(--hint);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       line-height: 1.45;
-      max-width: 320px;
+      max-width: 340px;
       margin: 0 auto;
     }
     .grid {
@@ -57,14 +52,13 @@
       background: var(--card);
       border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
     }
     .compare {
       position: relative;
       aspect-ratio: 3 / 4;
       overflow: hidden;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
+      background: #111118;
     }
     .compare img {
       position: absolute;
@@ -72,60 +66,42 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: opacity 0.45s ease, transform 0.5s ease;
+      transition: opacity 0.35s ease;
     }
-    .compare .before { z-index: 1; }
-    .compare .after {
-      z-index: 2;
-      opacity: 0;
-    }
-    .compare:hover .after,
-    .compare:focus-within .after,
-    .compare.is-after .after {
-      opacity: 1;
-    }
-    .compare:hover .before,
-    .compare.is-after .before {
-      transform: scale(1.03);
-    }
-    .badge {
+    .compare .before { z-index: 1; opacity: 1; }
+    .compare .after { z-index: 2; opacity: 0; }
+    .compare.show-after .before { opacity: 0; }
+    .compare.show-after .after { opacity: 1; }
+    .toggle {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      z-index: 5;
-      font-size: 0.65rem;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 6;
+      display: flex;
+      gap: 4px;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(8px);
+    }
+    .toggle button {
+      border: 0;
+      margin: 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
-      padding: 4px 8px;
-      border-radius: 6px;
-      background: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      backdrop-filter: blur(6px);
-      transition: opacity 0.3s;
+      color: rgba(255, 255, 255, 0.75);
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .compare.is-after .badge-before,
-    .compare:hover .badge-before { opacity: 0; }
-    .badge-after {
-      left: auto;
-      right: 8px;
-      opacity: 0;
+    .toggle button.is-active {
       background: var(--accent);
-    }
-    .compare.is-after .badge-after,
-    .compare:hover .badge-after { opacity: 1; }
-    .hint-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 4;
-      padding: 28px 8px 8px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.75));
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.9);
-      text-align: center;
-      pointer-events: none;
+      color: var(--accent-text);
     }
     .card figcaption {
       padding: 10px 10px 12px;
@@ -141,25 +117,35 @@
       margin-top: 2px;
     }
     footer {
-      margin-top: 22px;
+      margin-top: 20px;
       text-align: center;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--hint);
+    }
+    @media (hover: hover) and (pointer: fine) {
+      .compare:hover .before { opacity: 0; }
+      .compare:hover .after { opacity: 1; }
+      .compare.show-after:hover .before { opacity: 0; }
     }
   </style>
 </head>
 <body>
   <header>
     <h1>Галерея работ</h1>
-    <p class="subtitle">Наведи или нажми на карточку — увидишь преображение «До» и «После»</p>
+    <p class="subtitle">Нажми «До» или «После» на карточке, чтобы сравнить результат</p>
   </header>
 
   <div class="grid" id="gallery"></div>
 
-  <footer>Примеры стилей StyleGenie AI · замените фото в <code>gallery/index.html</code></footer>
+  <footer>StyleGenie AI · фото в папке <code>miniapp/gallery/images/</code></footer>
 
   <script>
     (function () {
+      try {
+        if (window.WebApp && typeof window.WebApp.ready === "function") {
+          window.WebApp.ready();
+        }
+      } catch (e) { /* ignore */ }
       const tg = window.Telegram && window.Telegram.WebApp;
       if (tg) {
         tg.ready();
@@ -167,63 +153,73 @@
         tg.setHeaderColor("secondary_bg_color");
       }
 
+      const base = new URL(".", window.location.href).href;
+
+      function imgUrl(path) {
+        return new URL(path, base).href;
+      }
+
       const items = [
-        {
-          title: "Обложка журнала",
-          style: "Editorial glamour",
-          before: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&q=80",
-        },
-        {
-          title: "Студийная лёгкость",
-          style: "High-key portrait",
-          before: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
-        },
-        {
-          title: "Неоновый город",
-          style: "Cyberpunk vibe",
-          before: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80",
-        },
-        {
-          title: "Винтаж",
-          style: "Film aesthetic",
-          before: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&q=80",
-        },
-        {
-          title: "Деловой стиль",
-          style: "Business portrait",
-          before: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=600&q=80",
-        },
-        {
-          title: "Мечтательный свет",
-          style: "Soft dreamlight",
-          before: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=600&q=80",
-          after: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=600&q=80",
-        },
+        { title: "Обложка журнала", style: "Editorial glamour", before: "images/01-before.jpg", after: "images/01-after.jpg" },
+        { title: "Студийная лёгкость", style: "High-key portrait", before: "images/02-before.jpg", after: "images/02-after.jpg" },
+        { title: "Неоновый город", style: "Cyberpunk vibe", before: "images/03-before.jpg", after: "images/03-after.jpg" },
+        { title: "Винтаж", style: "Film aesthetic", before: "images/04-before.jpg", after: "images/04-after.jpg" },
+        { title: "Деловой стиль", style: "Business portrait", before: "images/05-before.jpg", after: "images/05-after.jpg" },
+        { title: "Мечтательный свет", style: "Soft dreamlight", before: "images/06-before.jpg", after: "images/06-after.jpg" },
       ];
+
+      function setMode(compare, mode) {
+        const showAfter = mode === "after";
+        compare.classList.toggle("show-after", showAfter);
+        const btnBefore = compare.querySelector('[data-mode="before"]');
+        const btnAfter = compare.querySelector('[data-mode="after"]');
+        if (btnBefore) btnBefore.classList.toggle("is-active", !showAfter);
+        if (btnAfter) btnAfter.classList.toggle("is-active", showAfter);
+      }
 
       const grid = document.getElementById("gallery");
       items.forEach(function (item) {
         const card = document.createElement("figure");
         card.className = "card";
+
         const compare = document.createElement("div");
         compare.className = "compare";
-        compare.setAttribute("tabindex", "0");
-        compare.innerHTML =
-          '<span class="badge badge-before">До</span>' +
-          '<span class="badge badge-after">После</span>' +
-          '<img class="before" alt="До" loading="lazy" src="' + item.before + '">' +
-          '<img class="after" alt="После" loading="lazy" src="' + item.after + '">' +
-          '<div class="hint-bar">тап · удержание</div>';
-        compare.addEventListener("click", function () {
-          compare.classList.toggle("is-after");
+
+        const imgBefore = document.createElement("img");
+        imgBefore.className = "before";
+        imgBefore.alt = "До";
+        imgBefore.loading = "lazy";
+        imgBefore.decoding = "async";
+        imgBefore.src = imgUrl(item.before);
+
+        const imgAfter = document.createElement("img");
+        imgAfter.className = "after";
+        imgAfter.alt = "После";
+        imgAfter.loading = "lazy";
+        imgAfter.decoding = "async";
+        imgAfter.src = imgUrl(item.after);
+
+        const toggle = document.createElement("div");
+        toggle.className = "toggle";
+        toggle.innerHTML =
+          '<button type="button" data-mode="before" class="is-active">До</button>' +
+          '<button type="button" data-mode="after">После</button>';
+
+        toggle.addEventListener("click", function (e) {
+          const btn = e.target.closest("button[data-mode]");
+          if (!btn) return;
+          e.preventDefault();
+          e.stopPropagation();
+          setMode(compare, btn.getAttribute("data-mode"));
         });
+
+        compare.appendChild(imgBefore);
+        compare.appendChild(imgAfter);
+        compare.appendChild(toggle);
+
         const cap = document.createElement("figcaption");
         cap.innerHTML = item.title + "<span>" + item.style + "</span>";
+
         card.appendChild(compare);
         card.appendChild(cap);
         grid.appendChild(card);

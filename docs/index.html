@@ -3,16 +3,166 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>StyleGenie</title>
   <link rel="stylesheet" href="miniapp/miniapp.css">
 </head>
 <body>
   <article id="content" class="loading">Загрузка…</article>
   <script src="https://st.max.ru/js/max-web-app.js"></script>
-  <script src="miniapp/embedded_html.js?v=3"></script>
-  <script src="miniapp/miniapp.runtime.js?v=3"></script>
   <script>
-    StyleGenieMiniApp.bootRootApp(document.getElementById("content"));
+    (function () {
+      "use strict";
+
+      var BUNDLE_V = "5";
+      var contentEl = document.getElementById("content");
+
+      var ROUTE_ALIASES = {
+        terms: "legal:terms",
+        privacy: "legal:privacy",
+        consent: "legal:consent",
+      };
+
+      function readQueryParam(name) {
+        try {
+          var search = new URLSearchParams(window.location.search);
+          if (search.get(name)) return search.get(name);
+          var hash = (window.location.hash || "").replace(/^#/, "");
+          if (hash) {
+            var hp = new URLSearchParams(hash);
+            if (hp.get(name)) return hp.get(name);
+          }
+        } catch (e) { /* ignore */ }
+        return "";
+      }
+
+      function normalizeRoute(raw) {
+        var route = String(raw || "").trim();
+        if (!route) return "";
+        return ROUTE_ALIASES[route] || route;
+      }
+
+      function readStartParamFromUrl() {
+        return normalizeRoute(
+          readQueryParam("startapp") ||
+          readQueryParam("start_param") ||
+          readQueryParam("route") ||
+          readQueryParam("tgWebAppStartParam") ||
+          readQueryParam("WebAppStartParam")
+        );
+      }
+
+      function getInitDataRaw() {
+        try {
+          if (window.WebApp && window.WebApp.initData) {
+            return String(window.WebApp.initData);
+          }
+        } catch (e) { /* ignore */ }
+        return "";
+      }
+
+      function readStartParamFromInitData() {
+        try {
+          if (window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.start_param) {
+            return normalizeRoute(window.WebApp.initDataUnsafe.start_param);
+          }
+        } catch (e1) { /* ignore */ }
+        var raw = getInitDataRaw();
+        if (!raw) return "";
+        try {
+          return normalizeRoute(new URLSearchParams(raw).get("start_param") || "");
+        } catch (e2) {
+          return "";
+        }
+      }
+
+      function isInitDataReady() {
+        try {
+          if (window.WebApp) {
+            if (window.WebApp.initData) return true;
+            if (window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.auth_date) {
+              return true;
+            }
+          }
+        } catch (e) { /* ignore */ }
+        return false;
+      }
+
+      function initBridge() {
+        try {
+          if (window.WebApp && typeof window.WebApp.ready === "function") {
+            window.WebApp.ready();
+          }
+        } catch (e) { /* ignore */ }
+      }
+
+      function goDashboard() {
+        window.location.replace("miniapp/dashboard/");
+      }
+
+      function loadBundle(onReady) {
+        var pending = 2;
+        function done() {
+          pending -= 1;
+          if (pending === 0 && typeof onReady === "function") onReady();
+        }
+        var s1 = document.createElement("script");
+        s1.src = "miniapp/embedded_html.js?v=" + BUNDLE_V;
+        s1.onload = done;
+        s1.onerror = done;
+        var s2 = document.createElement("script");
+        s2.src = "miniapp/miniapp.runtime.js?v=" + BUNDLE_V;
+        s2.onload = done;
+        s2.onerror = done;
+        document.head.appendChild(s1);
+        document.head.appendChild(s2);
+      }
+
+      function bootRoute(route) {
+        loadBundle(function () {
+          if (window.StyleGenieMiniApp && typeof window.StyleGenieMiniApp.bootDirectRoute === "function") {
+            window.StyleGenieMiniApp.bootDirectRoute(contentEl, route);
+          } else {
+            contentEl.className = "error";
+            contentEl.textContent = "Не удалось загрузить Mini App.";
+          }
+        });
+      }
+
+      initBridge();
+
+      var urlRoute = readStartParamFromUrl();
+      if (urlRoute) {
+        bootRoute(urlRoute);
+        return;
+      }
+
+      var elapsed = 0;
+      var interval = 60;
+      var maxWait = 8000;
+      var dashboardDelay = 1200;
+
+      var timer = window.setInterval(function () {
+        var initRoute = readStartParamFromInitData();
+        if (initRoute) {
+          window.clearInterval(timer);
+          bootRoute(initRoute);
+          return;
+        }
+
+        if (isInitDataReady() && elapsed >= dashboardDelay) {
+          window.clearInterval(timer);
+          goDashboard();
+          return;
+        }
+
+        elapsed += interval;
+        if (elapsed >= maxWait) {
+          window.clearInterval(timer);
+          goDashboard();
+        }
+      }, interval);
+    })();
   </script>
 </body>
 </html>

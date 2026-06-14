@@ -6,6 +6,6 @@
  * botLink — ссылка на бота, например https://max.ru/YourBot
  */
 window.__SG_DASHBOARD__ = window.__SG_DASHBOARD__ || {
-  adminMaxIds: [12680939],
+  adminMaxIds: [],
   botLink: "https://max.ru/id110209280990_bot",
 };
