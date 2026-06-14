@@ -3,7 +3,7 @@
 #
 # В репозитории: Settings → Pages → Source: GitHub Actions
 # WEBAPP_BASE_URL в боте: https://<user>.github.io/<repo>/
-# Корень Mini App (MAX + deep link payload): docs/index.html
+# Корень Mini App (MAX + deep link payload): docs/index.html → dashboard по умолчанию
 name: Deploy legal docs to GitHub Pages
 
 on:
@@ -24,7 +24,10 @@ on:
       - "miniapp/legal/**"
       - "miniapp/models/**"
       - "miniapp/quality/**"
+      - "miniapp/dashboard/**"
       - "miniapp/gallery/**"
+      - "docs/miniapp/dashboard/**"
+      - "docs/miniapp/miniapp.js"
       - "docs/miniapp/gallery/**"
       - ".github/workflows/github-pages-legal.yml"
   workflow_dispatch:
@@ -67,6 +70,12 @@ jobs:
             mkdir -p docs/miniapp/legal
             cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
             echo "Synced miniapp/legal/index.html → docs/miniapp/legal/"
+          fi
+          if [ -f miniapp/dashboard/index.html ]; then
+            mkdir -p docs/miniapp/dashboard
+            cp -f miniapp/dashboard/index.html docs/miniapp/dashboard/index.html
+            cp -f miniapp/dashboard/dashboard-config.js docs/miniapp/dashboard/dashboard-config.js 2>/dev/null || true
+            echo "Synced miniapp/dashboard/ → docs/miniapp/dashboard/"
           fi
           if [ -f miniapp/gallery/index.html ]; then
             mkdir -p docs/miniapp/gallery
