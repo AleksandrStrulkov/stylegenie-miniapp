@@ -1,11 +1,12 @@
 /**
  * Настройки дашборда Mini App (GitHub Pages).
- * Скопируйте в dashboard-config.js и укажите свои значения.
  *
+ * apiBaseUrl — публичный HTTPS API, например https://your-domain.com/api/miniapp
  * adminMaxIds — id из ADMIN_USER_MAX_IDS (.env бота MAX).
- * botLink — ссылка на бота, например https://max.ru/YourBot
+ * botLink — ссылка на бота MAX.
  */
 window.__SG_DASHBOARD__ = window.__SG_DASHBOARD__ || {
+  apiBaseUrl: "",
   adminMaxIds: [],
   botLink: "https://max.ru/id110209280990_bot",
 };
