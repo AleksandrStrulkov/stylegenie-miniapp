@@ -6,7 +6,7 @@
  * botLink — ссылка на бота MAX.
  */
 window.__SG_DASHBOARD__ = window.__SG_DASHBOARD__ || {
-  apiBaseUrl: "",
+  apiBaseUrl: "https://api.style-genie.ru/api/miniapp",
   adminMaxIds: [],
   botLink: "https://max.ru/id110209280990_bot",
 };
