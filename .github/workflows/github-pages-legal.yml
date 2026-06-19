@@ -4,6 +4,7 @@
 # В репозитории: Settings → Pages → Source: GitHub Actions
 # WEBAPP_BASE_URL в боте: https://<user>.github.io/<repo>/
 # Корень Mini App (MAX + deep link payload): docs/index.html → dashboard по умолчанию
+
 name: Deploy legal docs to GitHub Pages
 
 on:
@@ -27,6 +28,11 @@ on:
       - "miniapp/dashboard/**"
       - "miniapp/gallery/**"
       - "docs/miniapp/dashboard/**"
+      - "docs/miniapp/bridge.js"
+      - "docs/miniapp/miniapp-content.css"
+      - "docs/miniapp/legal/terms.html"
+      - "docs/miniapp/legal/privacy.html"
+      - "docs/miniapp/legal/consent.html"
       - "docs/miniapp/miniapp.js"
       - "docs/miniapp/gallery/**"
       - ".github/workflows/github-pages-legal.yml"
