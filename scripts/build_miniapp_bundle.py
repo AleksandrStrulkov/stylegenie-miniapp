@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Pre-render Mini App routes to HTML (один запрос, без fetch и marked в WebView)."""
+"""Pre-render Mini App routes to HTML + быстрые standalone-страницы."""
 from __future__ import annotations
 
-import html
 import json
-import re
+import textwrap
 from pathlib import Path
 
 try:
@@ -16,7 +15,8 @@ except ImportError as exc:
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs" / "documents"
-OUT = ROOT / "docs" / "miniapp" / "embedded_html.js"
+MINIAPP = ROOT / "docs" / "miniapp"
+OUT = MINIAPP / "embedded_html.js"
 
 ROUTE_FILES: dict[str, str] = {
     "legal:terms": "public_offer.md",
@@ -24,6 +24,40 @@ ROUTE_FILES: dict[str, str] = {
     "legal:consent": "consent_personal.md",
     "models": "models_guide.md",
     "quality": "quality_guide.md",
+}
+
+# (md file, title, back href, back_link_max_only)
+STANDALONE_PAGES: dict[str, tuple[str, str, str, bool]] = {
+    "legal/terms.html": (
+        "public_offer.md",
+        "Публичная оферта",
+        "../dashboard/index.html",
+        True,
+    ),
+    "legal/privacy.html": (
+        "policy_personal.md",
+        "Политика ПДн",
+        "../dashboard/index.html",
+        True,
+    ),
+    "legal/consent.html": (
+        "consent_personal.md",
+        "Согласие на ПДн",
+        "../dashboard/index.html",
+        True,
+    ),
+    "models/index.html": (
+        "models_guide.md",
+        "Модели генерации",
+        "../dashboard/index.html",
+        False,
+    ),
+    "quality/index.html": (
+        "quality_guide.md",
+        "Качество генерации",
+        "../dashboard/index.html",
+        False,
+    ),
 }
 
 
@@ -42,6 +76,80 @@ def extract_title(text: str) -> str:
         if line.startswith("# "):
             return line[2:].strip()
     return "StyleGenie"
+
+
+def models_quality_card_html(text: str) -> str:
+    """Карточки вместо длинного markdown для models/quality."""
+    html = md_to_html(text)
+    if "card-grid" in html:
+        return html
+    return html.replace('<div class="doc-md">', '<div class="doc-md card-grid">')
+
+
+def standalone_page(
+    title: str,
+    body_html: str,
+    back_href: str,
+    *,
+    back_link_max_only: bool = False,
+) -> str:
+    if back_link_max_only:
+        topbar = (
+            f'          <div class="topbar" data-max-only hidden style="display:none">\n'
+            f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
+            f"          </div>"
+        )
+        platform_nav = '          <script defer src="../platform-nav.js"></script>'
+    else:
+        topbar = (
+            f'          <div class="topbar">\n'
+            f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
+            f"          </div>"
+        )
+        platform_nav = ""
+
+    return textwrap.dedent(
+        f"""\
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+          <meta name="theme-color" content="#0a0a12">
+          <title>{title}</title>
+          <link rel="stylesheet" href="../miniapp-content.css">
+        </head>
+        <body>
+{topbar}
+          <h1 class="page-title">{title}</h1>
+          <div class="content-shell">
+            {body_html}
+          </div>
+          <script defer src="https://st.max.ru/js/max-web-app.js"></script>
+          <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
+{platform_nav}
+          <script>
+            (function () {{
+              function ready() {{
+                try {{
+                  if (window.WebApp && typeof window.WebApp.ready === "function") {{
+                    window.WebApp.ready();
+                  }}
+                  var tg = window.Telegram && window.Telegram.WebApp;
+                  if (tg && typeof tg.ready === "function") tg.ready();
+                }} catch (e) {{}}
+              }}
+              if (document.readyState === "loading") {{
+                document.addEventListener("DOMContentLoaded", ready);
+              }} else {{
+                ready();
+              }}
+            }})();
+          </script>
+        </body>
+        </html>
+        """
+    )
 
 
 def main() -> None:
@@ -65,6 +173,32 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"Wrote {OUT} ({OUT.stat().st_size} bytes, {len(routes)} routes)")
+
+    for rel_path, (filename, title, back_href, back_max_only) in STANDALONE_PAGES.items():
+        raw = (DOCS / filename).read_text(encoding="utf-8")
+        if rel_path.startswith("models/") or rel_path.startswith("quality/"):
+            body = models_quality_card_html(raw)
+        else:
+            body = md_to_html(raw)
+        target = MINIAPP / rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(
+            standalone_page(title, body, back_href, back_link_max_only=back_max_only),
+            encoding="utf-8",
+        )
+        print(f"Wrote standalone {target}")
+
+    mirror_root = ROOT / "miniapp"
+    nav_src = MINIAPP / "platform-nav.js"
+    nav_dst = mirror_root / "platform-nav.js"
+    if nav_src.is_file():
+        nav_dst.parent.mkdir(parents=True, exist_ok=True)
+        nav_dst.write_text(nav_src.read_text(encoding="utf-8"), encoding="utf-8")
+    for rel_path in STANDALONE_PAGES:
+        src = MINIAPP / rel_path
+        dst = mirror_root / rel_path
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
 
 
 if __name__ == "__main__":
