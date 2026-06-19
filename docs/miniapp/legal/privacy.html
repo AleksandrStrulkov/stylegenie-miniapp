@@ -6,9 +6,11 @@
           <meta name="theme-color" content="#0a0a12">
           <title>Политика ПДн</title>
           <link rel="stylesheet" href="../miniapp-content.css">
+          <style>html.tg-legal .topbar{display:none!important}</style>
+          <script>(function(){if(new URLSearchParams(location.search).get('tg')==='1'){document.documentElement.classList.add('tg-legal');}})();</script>
         </head>
         <body>
-          <div class="topbar" data-max-only hidden style="display:none">
+          <div class="topbar">
             <a class="back-link" href="../dashboard/index.html">← Дашборд</a>
           </div>
           <h1 class="page-title">Политика ПДн</h1>
@@ -322,25 +324,20 @@
 <p>Согласие на обработку персональных данных: https://aleksandrstrulkov.github.io/stylegenie-miniapp/miniapp/legal/?doc=consent.</p>
 <h3>11.3. Во всём, что не урегулировано настоящей Политикой, Оператор руководствуется действующим законодательством Российской Федерации в области персональных данных.</h3></div>
           </div>
-          <script defer src="https://st.max.ru/js/max-web-app.js"></script>
-          <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
-          <script defer src="../platform-nav.js"></script>
           <script>
             (function () {
-              function ready() {
+              if (document.documentElement.classList.contains('tg-legal')) return;
+              var s = document.createElement('script');
+              s.defer = true;
+              s.src = 'https://st.max.ru/js/max-web-app.js';
+              s.onload = function () {
                 try {
-                  if (window.WebApp && typeof window.WebApp.ready === "function") {
+                  if (window.WebApp && typeof window.WebApp.ready === 'function') {
                     window.WebApp.ready();
                   }
-                  var tg = window.Telegram && window.Telegram.WebApp;
-                  if (tg && typeof tg.ready === "function") tg.ready();
                 } catch (e) {}
-              }
-              if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", ready);
-              } else {
-                ready();
-              }
+              };
+              document.body.appendChild(s);
             })();
           </script>
         </body>

@@ -6,6 +6,7 @@
           <meta name="theme-color" content="#0a0a12">
           <title>Качество генерации</title>
           <link rel="stylesheet" href="../miniapp-content.css">
+
         </head>
         <body>
           <div class="topbar">
@@ -23,8 +24,6 @@
 <p>Максимальная детализация и размер файла. Рекомендуется для печати, крупных экранов и когда важна каждая деталь образа.</p></div>
           </div>
           <script defer src="https://st.max.ru/js/max-web-app.js"></script>
-          <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
-
           <script>
             (function () {
               function ready() {
@@ -32,8 +31,6 @@
                   if (window.WebApp && typeof window.WebApp.ready === "function") {
                     window.WebApp.ready();
                   }
-                  var tg = window.Telegram && window.Telegram.WebApp;
-                  if (tg && typeof tg.ready === "function") tg.ready();
                 } catch (e) {}
               }
               if (document.readyState === "loading") {

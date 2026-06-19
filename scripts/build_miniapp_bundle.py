@@ -86,6 +86,48 @@ def models_quality_card_html(text: str) -> str:
     return html.replace('<div class="doc-md">', '<div class="doc-md card-grid">')
 
 
+_LEGAL_TELEGRAM_HEAD = """\
+          <style>html.tg-legal .topbar{display:none!important}</style>
+          <script>(function(){if(new URLSearchParams(location.search).get('tg')==='1'){document.documentElement.classList.add('tg-legal');}})();</script>"""
+
+_LEGAL_MAX_FOOTER = """\
+          <script>
+            (function () {
+              if (document.documentElement.classList.contains('tg-legal')) return;
+              var s = document.createElement('script');
+              s.defer = true;
+              s.src = 'https://st.max.ru/js/max-web-app.js';
+              s.onload = function () {
+                try {
+                  if (window.WebApp && typeof window.WebApp.ready === 'function') {
+                    window.WebApp.ready();
+                  }
+                } catch (e) {}
+              };
+              document.body.appendChild(s);
+            })();
+          </script>"""
+
+_STANDALONE_MAX_FOOTER = """\
+          <script defer src="https://st.max.ru/js/max-web-app.js"></script>
+          <script>
+            (function () {
+              function ready() {
+                try {
+                  if (window.WebApp && typeof window.WebApp.ready === "function") {
+                    window.WebApp.ready();
+                  }
+                } catch (e) {}
+              }
+              if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", ready);
+              } else {
+                ready();
+              }
+            })();
+          </script>"""
+
+
 def standalone_page(
     title: str,
     body_html: str,
@@ -93,20 +135,17 @@ def standalone_page(
     *,
     back_link_max_only: bool = False,
 ) -> str:
+    topbar = (
+        f'          <div class="topbar">\n'
+        f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
+        f"          </div>"
+    )
     if back_link_max_only:
-        topbar = (
-            f'          <div class="topbar" data-max-only hidden style="display:none">\n'
-            f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
-            f"          </div>"
-        )
-        platform_nav = '          <script defer src="../platform-nav.js"></script>'
+        head_extra = _LEGAL_TELEGRAM_HEAD
+        footer = _LEGAL_MAX_FOOTER
     else:
-        topbar = (
-            f'          <div class="topbar">\n'
-            f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
-            f"          </div>"
-        )
-        platform_nav = ""
+        head_extra = ""
+        footer = _STANDALONE_MAX_FOOTER
 
     return textwrap.dedent(
         f"""\
@@ -118,6 +157,7 @@ def standalone_page(
           <meta name="theme-color" content="#0a0a12">
           <title>{title}</title>
           <link rel="stylesheet" href="../miniapp-content.css">
+{head_extra}
         </head>
         <body>
 {topbar}
@@ -125,27 +165,7 @@ def standalone_page(
           <div class="content-shell">
             {body_html}
           </div>
-          <script defer src="https://st.max.ru/js/max-web-app.js"></script>
-          <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
-{platform_nav}
-          <script>
-            (function () {{
-              function ready() {{
-                try {{
-                  if (window.WebApp && typeof window.WebApp.ready === "function") {{
-                    window.WebApp.ready();
-                  }}
-                  var tg = window.Telegram && window.Telegram.WebApp;
-                  if (tg && typeof tg.ready === "function") tg.ready();
-                }} catch (e) {{}}
-              }}
-              if (document.readyState === "loading") {{
-                document.addEventListener("DOMContentLoaded", ready);
-              }} else {{
-                ready();
-              }}
-            }})();
-          </script>
+{footer}
         </body>
         </html>
         """
@@ -189,11 +209,6 @@ def main() -> None:
         print(f"Wrote standalone {target}")
 
     mirror_root = ROOT / "miniapp"
-    nav_src = MINIAPP / "platform-nav.js"
-    nav_dst = mirror_root / "platform-nav.js"
-    if nav_src.is_file():
-        nav_dst.parent.mkdir(parents=True, exist_ok=True)
-        nav_dst.write_text(nav_src.read_text(encoding="utf-8"), encoding="utf-8")
     for rel_path in STANDALONE_PAGES:
         src = MINIAPP / rel_path
         dst = mirror_root / rel_path
