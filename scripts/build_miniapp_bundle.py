@@ -26,39 +26,16 @@ ROUTE_FILES: dict[str, str] = {
     "quality": "quality_guide.md",
 }
 
-# (md file, title, back href, back_link_max_only)
-STANDALONE_PAGES: dict[str, tuple[str, str, str, bool]] = {
-    "legal/terms.html": (
-        "public_offer.md",
-        "Публичная оферта",
-        "../dashboard/index.html",
-        True,
-    ),
-    "legal/privacy.html": (
-        "policy_personal.md",
-        "Политика ПДн",
-        "../dashboard/index.html",
-        True,
-    ),
-    "legal/consent.html": (
-        "consent_personal.md",
-        "Согласие на ПДн",
-        "../dashboard/index.html",
-        True,
-    ),
-    "models/index.html": (
-        "models_guide.md",
-        "Модели генерации",
-        "../dashboard/index.html",
-        False,
-    ),
-    "quality/index.html": (
-        "quality_guide.md",
-        "Качество генерации",
-        "../dashboard/index.html",
-        False,
-    ),
+# (md file, title, with_dashboard_back)
+STANDALONE_PAGES: dict[str, tuple[str, str, bool]] = {
+    "legal/terms.html": ("public_offer.md", "Публичная оферта", False),
+    "legal/privacy.html": ("policy_personal.md", "Политика ПДн", False),
+    "legal/consent.html": ("consent_personal.md", "Согласие на ПДн", False),
+    "models/index.html": ("models_guide.md", "Модели генерации", True),
+    "quality/index.html": ("quality_guide.md", "Качество генерации", True),
 }
+
+_DASHBOARD_BACK_HREF = "../dashboard/index.html"
 
 
 def md_to_html(text: str) -> str:
@@ -86,29 +63,19 @@ def models_quality_card_html(text: str) -> str:
     return html.replace('<div class="doc-md">', '<div class="doc-md card-grid">')
 
 
-_LEGAL_TELEGRAM_HEAD = """\
-          <style>html.tg-legal .topbar{display:none!important}</style>
-          <script>(function(){if(new URLSearchParams(location.search).get('tg')==='1'){document.documentElement.classList.add('tg-legal');}})();</script>"""
-
-_LEGAL_MAX_FOOTER = """\
-          <script>
-            (function () {
-              if (document.documentElement.classList.contains('tg-legal')) return;
-              var s = document.createElement('script');
-              s.defer = true;
-              s.src = 'https://st.max.ru/js/max-web-app.js';
-              s.onload = function () {
-                try {
-                  if (window.WebApp && typeof window.WebApp.ready === 'function') {
-                    window.WebApp.ready();
-                  }
-                } catch (e) {}
-              };
-              document.body.appendChild(s);
-            })();
-          </script>"""
-
-_STANDALONE_MAX_FOOTER = """\
+def standalone_page(
+    title: str,
+    body_html: str,
+    *,
+    with_dashboard_back: bool = False,
+) -> str:
+    if with_dashboard_back:
+        topbar = (
+            f'          <div class="topbar">\n'
+            f'            <a class="back-link" href="{_DASHBOARD_BACK_HREF}">← Дашборд</a>\n'
+            f"          </div>"
+        )
+        footer = """\
           <script defer src="https://st.max.ru/js/max-web-app.js"></script>
           <script>
             (function () {
@@ -126,26 +93,9 @@ _STANDALONE_MAX_FOOTER = """\
               }
             })();
           </script>"""
-
-
-def standalone_page(
-    title: str,
-    body_html: str,
-    back_href: str,
-    *,
-    back_link_max_only: bool = False,
-) -> str:
-    topbar = (
-        f'          <div class="topbar">\n'
-        f'            <a class="back-link" href="{back_href}">← Дашборд</a>\n'
-        f"          </div>"
-    )
-    if back_link_max_only:
-        head_extra = _LEGAL_TELEGRAM_HEAD
-        footer = _LEGAL_MAX_FOOTER
     else:
-        head_extra = ""
-        footer = _STANDALONE_MAX_FOOTER
+        topbar = ""
+        footer = ""
 
     return textwrap.dedent(
         f"""\
@@ -157,7 +107,6 @@ def standalone_page(
           <meta name="theme-color" content="#0a0a12">
           <title>{title}</title>
           <link rel="stylesheet" href="../miniapp-content.css">
-{head_extra}
         </head>
         <body>
 {topbar}
@@ -194,7 +143,7 @@ def main() -> None:
     )
     print(f"Wrote {OUT} ({OUT.stat().st_size} bytes, {len(routes)} routes)")
 
-    for rel_path, (filename, title, back_href, back_max_only) in STANDALONE_PAGES.items():
+    for rel_path, (filename, title, with_dashboard_back) in STANDALONE_PAGES.items():
         raw = (DOCS / filename).read_text(encoding="utf-8")
         if rel_path.startswith("models/") or rel_path.startswith("quality/"):
             body = models_quality_card_html(raw)
@@ -203,7 +152,7 @@ def main() -> None:
         target = MINIAPP / rel_path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(
-            standalone_page(title, body, back_href, back_link_max_only=back_max_only),
+            standalone_page(title, body, with_dashboard_back=with_dashboard_back),
             encoding="utf-8",
         )
         print(f"Wrote standalone {target}")
