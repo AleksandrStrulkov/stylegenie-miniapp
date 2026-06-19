@@ -656,6 +656,8 @@
       function loadProfile() {
         var pill = document.getElementById("balance-pill");
         var bridge = window.StyleGenieBridge;
+        var user = getUser();
+        showAdminBlock(user, null);
         if (!bridge || !bridge.fetchProfile) {
           setupCtaButton(null);
           personalize(null);

@@ -1,19 +1,45 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Качество генерации</title>
-  <link rel="stylesheet" href="../miniapp.css">
-  <script src="https://st.max.ru/js/max-web-app.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="../embedded_html.js?v=5"></script>
-  <script src="../miniapp.runtime.js?v=5"></script>
-</head>
-<body>
-  <article id="content" class="loading">Загрузка…</article>
-  <script>
-    StyleGenieMiniApp.bootDirectRoute(document.getElementById("content"), "quality");
-  </script>
-</body>
-</html>
+        <!DOCTYPE html>
+        <html lang="ru">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+          <meta name="theme-color" content="#0a0a12">
+          <title>Качество генерации</title>
+          <link rel="stylesheet" href="../miniapp-content.css">
+        </head>
+        <body>
+          <div class="topbar">
+            <a class="back-link" href="../dashboard/index.html">← Дашборд</a>
+          </div>
+          <h1 class="page-title">Качество генерации</h1>
+          <div class="content-shell">
+            <div class="doc-md card-grid"><h1>Качество генерации (1K / 2K / 4K)</h1>
+<p>Качество задаёт <strong>разрешение выходного изображения</strong> и влияет на стоимость в 💎.</p>
+<h2>1K</h2>
+<p>Минимальное разрешение. Быстрее и дешевле. Подходит для превью, сторис и случаев, когда не нужна максимальная детализация.</p>
+<h2>2K</h2>
+<p>Сбалансированный вариант: заметно выше детализация, чем у 1K, при умеренной стоимости. Хороший выбор для большинства публикаций.</p>
+<h2>4K</h2>
+<p>Максимальная детализация и размер файла. Рекомендуется для печати, крупных экранов и когда важна каждая деталь образа.</p></div>
+          </div>
+          <script defer src="https://st.max.ru/js/max-web-app.js"></script>
+          <script>
+            (function () {
+              function ready() {
+                try {
+                  if (window.WebApp && typeof window.WebApp.ready === "function") {
+                    window.WebApp.ready();
+                  }
+                  var tg = window.Telegram && window.Telegram.WebApp;
+                  if (tg && typeof tg.ready === "function") tg.ready();
+                } catch (e) {}
+              }
+              if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", ready);
+              } else {
+                ready();
+              }
+            })();
+          </script>
+        </body>
+        </html>
