@@ -1,712 +1,817 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a12">
-  <title>StyleGenie AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://st.max.ru/js/max-web-app.js"></script>
-  <script src="../bridge.js"></script>
-  <script src="dashboard-config.js"></script>
-  <style>
-    :root {
-      --bg-0: #06060c;
-      --bg-1: #0e0e18;
-      --glass: rgba(255, 255, 255, 0.06);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-hover: rgba(255, 255, 255, 0.1);
-      --text: #f4f4f8;
-      --muted: rgba(244, 244, 248, 0.58);
-      --accent: #a78bfa;
-      --accent-2: #22d3ee;
-      --accent-glow: rgba(167, 139, 250, 0.35);
-      --success: #34d399;
-      --radius: 18px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a12">
+    <title>StyleGenie AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+    <script src="../bridge.js"></script>
+    <script src="dashboard-config.js"></script>
+    <style>
+        :root {
+            --bg-0: #06060c;
+            --bg-1: #0e0e18;
+            --glass: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-hover: rgba(255, 255, 255, 0.1);
+            --text: #f4f4f8;
+            --muted: rgba(244, 244, 248, 0.58);
+            --accent: #a78bfa;
+            --accent-2: #22d3ee;
+            --accent-glow: rgba(167, 139, 250, 0.35);
+            --success: #34d399;
+            --radius: 18px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
 
-    *, *::before, *::after { box-sizing: border-box; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
 
-    html { -webkit-text-size-adjust: 100%; }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Outfit", system-ui, sans-serif;
-      color: var(--text);
-      background: var(--bg-0);
-      padding: 14px 16px calc(24px + var(--safe-bottom));
-      overflow-x: hidden;
-    }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Outfit", system-ui, sans-serif;
+            color: var(--text);
+            background: var(--bg-0);
+            padding: 14px 16px calc(24px + var(--safe-bottom));
+            overflow-x: hidden;
+        }
 
-    .bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(167, 139, 250, 0.22), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(34, 211, 238, 0.14), transparent 50%),
-        radial-gradient(ellipse 70% 50% at 50% 100%, rgba(124, 58, 237, 0.12), transparent 55%),
-        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
-    }
+        .bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background: radial-gradient(ellipse 80% 50% at 20% -10%, rgba(167, 139, 250, 0.22), transparent 55%),
+            radial-gradient(ellipse 60% 40% at 90% 10%, rgba(34, 211, 238, 0.14), transparent 50%),
+            radial-gradient(ellipse 70% 50% at 50% 100%, rgba(124, 58, 237, 0.12), transparent 55%),
+            linear-gradient(180deg, var(--bg-1) 0%, var(--bg-0) 100%);
+        }
 
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(60px);
-      opacity: 0.5;
-      animation: float 12s ease-in-out infinite;
-    }
-    .orb-a { width: 220px; height: 220px; background: #7c3aed; top: 8%; left: -8%; }
-    .orb-b { width: 180px; height: 180px; background: #0891b2; top: 42%; right: -12%; animation-delay: -4s; }
-    .orb-c { width: 140px; height: 140px; background: #db2777; bottom: 18%; left: 30%; animation-delay: -7s; opacity: 0.35; }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: float 12s ease-in-out infinite;
+        }
 
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50% { transform: translate(12px, -18px) scale(1.05); }
-    }
+        .orb-a {
+            width: 220px;
+            height: 220px;
+            background: #7c3aed;
+            top: 8%;
+            left: -8%;
+        }
 
-    .app {
-      position: relative;
-      z-index: 1;
-      max-width: 440px;
-      margin: 0 auto;
-    }
+        .orb-b {
+            width: 180px;
+            height: 180px;
+            background: #0891b2;
+            top: 42%;
+            right: -12%;
+            animation-delay: -4s;
+        }
 
-    .glass {
-      background: var(--glass);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--radius);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-    }
+        .orb-c {
+            width: 140px;
+            height: 140px;
+            background: #db2777;
+            bottom: 18%;
+            left: 30%;
+            animation-delay: -7s;
+            opacity: 0.35;
+        }
 
-    .hero {
-      padding: 18px 18px 16px;
-      margin-bottom: 16px;
-    }
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(12px, -18px) scale(1.05);
+            }
+        }
 
-    .hero-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 440px;
+            margin: 0 auto;
+        }
 
-    .avatar-wrap {
-      position: relative;
-      flex-shrink: 0;
-    }
+        .glass {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+        }
 
-    .avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      background: linear-gradient(135deg, #4c1d95, #1e1b4b);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.75rem;
-    }
+        .hero {
+            padding: 18px 18px 16px;
+            margin-bottom: 16px;
+        }
 
-    .avatar-ring {
-      position: absolute;
-      inset: -3px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2)) border-box;
-      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
+        .hero-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
-    .hero-text h1 {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+        .avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
 
-    .hero-text p {
-      margin: 4px 0 0;
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.35;
-    }
+        .avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #4c1d95, #1e1b4b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+        }
 
-    .status-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
-    }
+        .avatar-ring {
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            /*-webkit-mask: linear-gradient(#fff, #fff) padding-box, linear-gradient(#fff, #fff);*/
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
 
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+        .hero-text h1 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
 
-    .pill-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
-    }
+        .hero-text p {
+            margin: 4px 0 0;
+            font-size: 0.82rem;
+            color: var(--muted);
+            line-height: 1.35;
+        }
 
-    .pill-diamond { color: #fde68a; }
+        /*.status-row {*/
+        /*    display: flex;*/
+        /*    flex-wrap: wrap;*/
+        /*    gap: 8px;*/
+        /*    margin-top: 14px;*/
+        /*}*/
 
-    .cta {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      margin-top: 14px;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 14px;
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #fff;
-      cursor: pointer;
-      background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #0891b2 100%);
-      box-shadow: 0 8px 24px var(--accent-glow);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .cta:active { transform: scale(0.98); }
+        .status-row {
+            display: flex; /* Включаем гибкий контейнер */
+            gap: 8px; /* Расстояние между кнопками */
+            margin-top: 14px; /* Отступ сверху */
+            width: 100%; /* Чтобы ряд занимал всю ширину */
+        }
 
-    .section-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin: 0 0 10px 4px;
-    }
+        /*.pill {*/
+        /*    display: inline-flex;*/
+        /*    align-items: center;*/
+        /*    gap: 6px;*/
+        /*    padding: 6px 12px;*/
+        /*    border-radius: 999px;*/
+        /*    font-size: 0.78rem;*/
+        /*    font-weight: 600;*/
+        /*    background: rgba(255, 255, 255, 0.07);*/
+        /*    border: 1px solid rgba(255, 255, 255, 0.1);*/
+        /*}*/
 
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    }
+        .pill {
+            flex: 1; /* Главное: делим место поровну */
+            justify-content: center; /* Центрируем текст внутри плашки */
 
-    .step {
-      padding: 14px 10px;
-      text-align: center;
-    }
+            /* Твои исходные стили без изменений */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff; /* На всякий случай добавила цвет текста */
+            white-space: nowrap; /* Чтобы текст не прыгал на новую строку */
+        }
 
-    .step-icon {
-      width: 40px;
-      height: 40px;
-      margin: 0 auto 8px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      background: rgba(167, 139, 250, 0.15);
-      border: 1px solid rgba(167, 139, 250, 0.25);
-    }
+        .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+        }
 
-    .step-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      line-height: 1.3;
-      color: rgba(244, 244, 248, 0.88);
-    }
+        .pill-diamond {
+            color: #fde68a;
+        }
 
-    .step-arrow {
-      display: none;
-    }
+        .cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 14px;
+            padding: 14px 18px;
+            border: none;
+            border-radius: 14px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #0891b2 100%);
+            box-shadow: 0 8px 24px var(--accent-glow);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    .cmd-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
+        .cta:active {
+            transform: scale(0.98);
+        }
 
-    .cmd {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      width: 100%;
-      padding: 13px 14px;
-      border: 1px solid var(--glass-border);
-      border-radius: 14px;
-      background: var(--glass);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: inherit;
-      font-family: inherit;
-      text-align: left;
-      cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .cmd:hover, .cmd:focus-visible {
-      background: var(--glass-hover);
-      border-color: rgba(167, 139, 250, 0.35);
-      outline: none;
-    }
-    .cmd:active { transform: scale(0.99); }
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 10px 4px;
+        }
 
-    .cmd-icon {
-      width: 42px;
-      height: 42px;
-      flex-shrink: 0;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-    .cmd-body { flex: 1; min-width: 0; }
+        .step {
+            padding: 14px 10px;
+            text-align: center;
+        }
 
-    .cmd-name {
-      display: block;
-      font-size: 0.92rem;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: rgba(167, 139, 250, 0.15);
+            border: 1px solid rgba(167, 139, 250, 0.25);
+        }
 
-    .cmd-desc {
-      display: block;
-      font-size: 0.76rem;
-      color: var(--muted);
-      line-height: 1.35;
-    }
+        .step-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1.3;
+            color: rgba(244, 244, 248, 0.88);
+        }
 
-    .cmd-slash {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--accent-2);
-      opacity: 0.85;
-      flex-shrink: 0;
-    }
+        .step-arrow {
+            display: none;
+        }
 
-    .admin-block {
-      margin-bottom: 20px;
-    }
-    .admin-block[hidden] { display: none !important; }
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
 
-    .admin-block .section-title { color: rgba(251, 191, 36, 0.75); }
+        .cmd {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: inherit;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    .cmd.admin .cmd-icon {
-      background: rgba(251, 191, 36, 0.12);
-      border-color: rgba(251, 191, 36, 0.22);
-    }
+        .cmd:hover, .cmd:focus-visible {
+            background: var(--glass-hover);
+            border-color: rgba(167, 139, 250, 0.35);
+            outline: none;
+        }
 
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(6, 6, 12, 0.72);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.22s ease, visibility 0.22s ease;
-      pointer-events: none;
-    }
-    .modal-overlay.show {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-    .modal-box {
-      width: min(92vw, 360px);
-      padding: 22px 20px 18px;
-      border-radius: 16px;
-      background: rgba(22, 22, 36, 0.96);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
-      text-align: center;
-    }
-    .modal-title {
-      margin: 0 0 10px;
-      font-size: 1rem;
-      font-weight: 700;
-    }
-    .modal-text {
-      margin: 0 0 16px;
-      font-size: 0.86rem;
-      line-height: 1.45;
-      color: var(--muted);
-    }
-    .modal-cmd {
-      display: inline-block;
-      margin-bottom: 16px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--accent-2);
-      background: rgba(34, 211, 238, 0.1);
-      border: 1px solid rgba(34, 211, 238, 0.25);
-    }
-    .modal-close {
-      width: 100%;
-      padding: 12px 16px;
-      border: none;
-      border-radius: 12px;
-      font-family: inherit;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #fff;
-      cursor: pointer;
-      background: linear-gradient(135deg, #7c3aed, #6366f1);
-    }
+        .cmd:active {
+            transform: scale(0.99);
+        }
 
-    .cta:disabled {
-      opacity: 0.72;
-      cursor: wait;
-    }
+        .cmd-icon {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
-    .brand-footer {
-      text-align: center;
-      margin-top: 16px;
-      font-size: 0.7rem;
-      color: rgba(244, 244, 248, 0.35);
-    }
-  </style>
+        .cmd-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cmd-name {
+            display: block;
+            font-size: 0.92rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .cmd-desc {
+            display: block;
+            font-size: 0.76rem;
+            color: var(--muted);
+            line-height: 1.35;
+        }
+
+        .cmd-slash {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-2);
+            opacity: 0.85;
+            flex-shrink: 0;
+        }
+
+        .admin-block {
+            margin-bottom: 20px;
+        }
+
+        .admin-block[hidden] {
+            display: none !important;
+        }
+
+        .admin-block .section-title {
+            color: rgba(251, 191, 36, 0.75);
+        }
+
+        .cmd.admin .cmd-icon {
+            background: rgba(251, 191, 36, 0.12);
+            border-color: rgba(251, 191, 36, 0.22);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(6, 6, 12, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.22s ease, visibility 0.22s ease;
+            pointer-events: none;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            width: min(92vw, 360px);
+            padding: 22px 20px 18px;
+            border-radius: 16px;
+            background: rgba(22, 22, 36, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+            text-align: center;
+        }
+
+        .modal-title {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .modal-text {
+            margin: 0 0 16px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        .modal-cmd {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent-2);
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.25);
+        }
+
+        .modal-close {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+        }
+
+        .cta:disabled {
+            opacity: 0.72;
+            cursor: wait;
+        }
+
+        .brand-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.7rem;
+            color: rgba(244, 244, 248, 0.35);
+        }
+    </style>
 </head>
 <body>
-  <div class="bg" aria-hidden="true">
+<div class="bg" aria-hidden="true">
     <div class="orb orb-a"></div>
     <div class="orb orb-b"></div>
     <div class="orb orb-c"></div>
-  </div>
+</div>
 
-  <div class="app">
+<div class="app">
     <header class="hero glass">
-      <div class="hero-top">
-        <div class="avatar-wrap">
-          <div class="avatar" id="avatar" aria-hidden="true">🧞‍♂️</div>
-          <div class="avatar-ring"></div>
+        <div class="hero-top">
+            <div class="avatar-wrap">
+                <div class="avatar" id="avatar" aria-hidden="true">🧞‍♂️</div>
+                <div class="avatar-ring"></div>
+            </div>
+            <div class="hero-text">
+                <h1 id="greeting">StyleGenie AI</h1>
+                <p id="subtitle">Умный дашборд · команды и подсказки</p>
+            </div>
         </div>
-        <div class="hero-text">
-          <h1 id="greeting">StyleGenie AI</h1>
-          <p id="subtitle">Умный дашборд · команды и подсказки</p>
+        <div class="status-row">
+            <span class="pill"><span class="pill-dot"></span> Статус: Активен</span>
+            <span class="pill pill-diamond" id="balance-pill">Баланс — /profile</span>
         </div>
-      </div>
-      <div class="status-row">
-        <span class="pill"><span class="pill-dot"></span> Статус: Активен</span>
-        <span class="pill pill-diamond" id="balance-pill">💎 Баланс — /profile</span>
-      </div>
-      <button type="button" class="cta" id="cta-create">🎨 Создать образ</button>
+        <button type="button" class="cta" id="cta-create">🎨 Создать образ</button>
     </header>
 
     <p class="section-title">Команды бота</p>
     <div class="cmd-grid" id="user-commands"></div>
 
     <div class="admin-block" id="admin-block" hidden>
-      <p class="section-title">Администратор</p>
-      <div class="cmd-grid" id="admin-commands"></div>
+        <p class="section-title">Администратор</p>
+        <div class="cmd-grid" id="admin-commands"></div>
     </div>
 
     <p class="brand-footer">StyleGenie AI · MAX Mini App</p>
-  </div>
+</div>
 
-  <div class="modal-overlay" id="command-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+<div class="modal-overlay" id="command-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
     <div class="modal-box">
-      <h2 class="modal-title" id="modal-title">Команда скопирована</h2>
-      <p class="modal-text" id="modal-text">Вставьте команду в чат с ботом</p>
-      <div class="modal-cmd" id="modal-cmd"></div>
-      <button type="button" class="modal-close" id="modal-close">Понятно</button>
+        <h2 class="modal-title" id="modal-title">Команда скопирована</h2>
+        <p class="modal-text" id="modal-text">Вставьте команду в чат с ботом</p>
+        <div class="modal-cmd" id="modal-cmd"></div>
+        <button type="button" class="modal-close" id="modal-close">Понятно</button>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     (function () {
-      "use strict";
+        "use strict";
 
-      var CFG = window.__SG_DASHBOARD__ || {};
-      var BOT_LINK = CFG.botLink || "https://max.ru/";
+        var CFG = window.__SG_DASHBOARD__ || {};
+        var BOT_LINK = CFG.botLink || "https://max.ru/";
 
-      var USER_COMMANDS = [
-        { cmd: "start", icon: "🚀", title: "Запуск бота", desc: "Регистрация и выбор стиля" },
-        { cmd: "help", icon: "❓", title: "Справка по командам", desc: "Список всех команд" },
-        { cmd: "info", icon: "ℹ️", title: "Общая информация", desc: "Правила, тарифы, галерея" },
-        { cmd: "history", icon: "📚", title: "История генераций", desc: "Ваши прошлые образы" },
-        { cmd: "profile", icon: "👤", title: "Данные профиля", desc: "Модель, формат кадра, настройки" },
-        { cmd: "buy", icon: "💎", title: "Пополнить баланс", desc: "Купить генерации 💎" },
-        { cmd: "referrals", icon: "🤝", title: "Реферальная программа", desc: "Пригласи друзей" },
-        { cmd: "support", icon: "💬", title: "Обращение в поддержку", desc: "Написать в поддержку" },
-        { cmd: "reviews", icon: "⭐", title: "Канал отзывов", desc: "Посмотреть отзывы" },
-        { cmd: "new_review", icon: "✍️", title: "Оставить отзыв", desc: "Поделиться впечатлениями" }
-      ];
+        var USER_COMMANDS = [
+            {cmd: "start", icon: "🚀", title: "Запуск бота", desc: "Регистрация и выбор стиля"},
+            {cmd: "help", icon: "❓", title: "Справка по командам", desc: "Список всех команд"},
+            {cmd: "info", icon: "ℹ️", title: "Общая информация", desc: "Правила, тарифы, галерея"},
+            {cmd: "history", icon: "📚", title: "История генераций", desc: "Ваши прошлые образы"},
+            {cmd: "profile", icon: "👤", title: "Данные профиля", desc: "Модель, формат кадра, настройки"},
+            {cmd: "buy", icon: "💎", title: "Пополнить баланс", desc: "Купить генерации 💎"},
+            {cmd: "referrals", icon: "🤝", title: "Реферальная программа", desc: "Пригласи друзей"},
+            {cmd: "support", icon: "💬", title: "Обращение в поддержку", desc: "Написать в поддержку"},
+            {cmd: "reviews", icon: "⭐", title: "Канал отзывов", desc: "Посмотреть отзывы"},
+            {cmd: "new_review", icon: "✍️", title: "Оставить отзыв", desc: "Поделиться впечатлениями"}
+        ];
 
-      var ADMIN_COMMANDS = [
-        { cmd: "broadcast", icon: "📢", title: "Рассылка пользователям", desc: "Сообщение зарегистрированным" },
-        { cmd: "add_diamonds", icon: "➕", title: "Начислить 💎", desc: "Пополнить баланс пользователя" },
-        { cmd: "delete_user", icon: "🗑️", title: "Удалить пользователя", desc: "Удаление из базы данных" },
-        { cmd: "chat_id", icon: "#️⃣", title: "chat_id чата", desc: "ID для .env группы поддержки" },
-        { cmd: "my_id", icon: "🆔", title: "Ваш MAX user_id", desc: "Идентификатор в MAX" }
-      ];
+        var ADMIN_COMMANDS = [
+            {cmd: "broadcast", icon: "📢", title: "Рассылка пользователям", desc: "Сообщение зарегистрированным"},
+            {cmd: "add_diamonds", icon: "➕", title: "Начислить 💎", desc: "Пополнить баланс пользователя"},
+            {cmd: "delete_user", icon: "🗑️", title: "Удалить пользователя", desc: "Удаление из базы данных"},
+            {cmd: "chat_id", icon: "#️⃣", title: "chat_id чата", desc: "ID для .env группы поддержки"},
+            {cmd: "my_id", icon: "🆔", title: "Ваш MAX user_id", desc: "Идентификатор в MAX"}
+        ];
 
-      var modalEl = document.getElementById("command-modal");
-      var modalCmdEl = document.getElementById("modal-cmd");
-      var modalTextEl = document.getElementById("modal-text");
-      var modalCloseEl = document.getElementById("modal-close");
-      var ctaEl = document.getElementById("cta-create");
-      var ctaMode = "continue";
-      var modalOpen = false;
+        var modalEl = document.getElementById("command-modal");
+        var modalCmdEl = document.getElementById("modal-cmd");
+        var modalTextEl = document.getElementById("modal-text");
+        var modalCloseEl = document.getElementById("modal-close");
+        var ctaEl = document.getElementById("cta-create");
+        var ctaMode = "continue";
+        var modalOpen = false;
 
-      function dismissCommandModal() {
-        if (!modalOpen) return;
-        modalOpen = false;
-        modalEl.classList.remove("show");
-        modalEl.hidden = true;
-      }
-
-      function showCommandModal(slash, copyFailed) {
-        modalCmdEl.textContent = slash;
-        modalTextEl.textContent = copyFailed
-          ? "Скопируйте команду вручную и вставьте в чат с ботом"
-          : (slash + " скопировано — вставьте в чат с ботом");
-        modalEl.hidden = false;
-        modalEl.classList.add("show");
-        modalOpen = true;
-      }
-
-      function bindModalDismiss() {
-        modalCloseEl.addEventListener("click", dismissCommandModal);
-        modalEl.addEventListener("click", function (e) {
-          if (e.target === modalEl) dismissCommandModal();
-        });
-        window.addEventListener("scroll", dismissCommandModal, { passive: true });
-        window.addEventListener("touchmove", dismissCommandModal, { passive: true });
-      }
-
-      function initBridge() {
-        try {
-          if (window.WebApp && typeof window.WebApp.ready === "function") {
-            window.WebApp.ready();
-          }
-        } catch (e) { /* ignore */ }
-      }
-
-      function getUser() {
-        try {
-          if (window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.user) {
-            return window.WebApp.initDataUnsafe.user;
-          }
-        } catch (e1) { /* ignore */ }
-        return null;
-      }
-
-      function isAdmin(userId, profileData) {
-        if (profileData && profileData.is_admin) return true;
-        var ids = CFG.adminMaxIds;
-        if (!userId || !Array.isArray(ids) || !ids.length) return false;
-        var uid = Number(userId);
-        for (var i = 0; i < ids.length; i++) {
-          if (Number(ids[i]) === uid) return true;
-        }
-        return false;
-      }
-
-      function showAdminBlock(user, profileData) {
-        if (isAdmin(user && user.id, profileData)) {
-          document.getElementById("admin-block").hidden = false;
-        }
-      }
-
-      function personalize(profileData) {
-        var user = getUser();
-        var greeting = document.getElementById("greeting");
-        var subtitle = document.getElementById("subtitle");
-        var avatar = document.getElementById("avatar");
-
-        if (user) {
-          var name = user.first_name || user.username || "друг";
-          greeting.textContent = "Привет, " + name + "!";
-          subtitle.textContent = user.username ? "@" + user.username : "StyleGenie AI · MAX";
-          if (user.photo_url) {
-            avatar.innerHTML = "";
-            var img = document.createElement("img");
-            img.src = user.photo_url;
-            img.alt = "";
-            img.className = "avatar";
-            img.style.width = "56px";
-            img.style.height = "56px";
-            avatar.replaceWith(img);
-            img.id = "avatar";
-          }
+        function dismissCommandModal() {
+            if (!modalOpen) return;
+            modalOpen = false;
+            modalEl.classList.remove("show");
+            modalEl.hidden = true;
         }
 
-        showAdminBlock(user, profileData);
-      }
+        // function showCommandModal(slash, copyFailed) {
+        //     modalCmdEl.textContent = slash;
+        //     modalTextEl.textContent = copyFailed
+        //         ? "Скопируйте команду вручную и вставьте в чат с ботом"
+        //         : (slash + " скопировано — вставьте в чат с ботом");
+        //     modalEl.hidden = false;
+        //     modalEl.classList.add("show");
+        //     modalOpen = true;
+        // }
 
-      function setupCtaButton(profileData) {
-        if (!ctaEl) return;
-        var bridge = window.StyleGenieBridge;
-        var hasApi = bridge && bridge.getInitData() && String(CFG.apiBaseUrl || "").trim();
-        if (!hasApi) {
-          ctaMode = "return";
-          ctaEl.textContent = "↩️ Вернуться в бота";
-          return;
-        }
-        if (profileData && profileData.can_continue) {
-          ctaMode = "continue";
-          ctaEl.textContent = "🎨 Продолжить образ";
-          return;
-        }
-        if (profileData && profileData.registered) {
-          ctaMode = "continue";
-          ctaEl.textContent = "🎨 Создать образ";
-          return;
-        }
-        ctaMode = "return";
-        ctaEl.textContent = "↩️ Вернуться в бота";
-      }
+        function showCommandModal(slash, copyFailed) {
+            modalCmdEl.textContent = slash;
 
-      function copyText(text) {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          return navigator.clipboard.writeText(text);
+            // Оставляем только чистый текст без повтора команды
+            modalTextEl.textContent = copyFailed
+                ? "Скопируйте команду вручную и вставьте в чат с ботом"
+                : "вставьте в чат с ботом";
+
+            modalEl.hidden = false;
+            modalEl.classList.add("show");
+            modalOpen = true;
         }
-        return new Promise(function (resolve, reject) {
-          try {
-            var ta = document.createElement("textarea");
-            ta.value = text;
-            ta.style.position = "fixed";
-            ta.style.opacity = "0";
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand("copy");
-            document.body.removeChild(ta);
-            resolve();
-          } catch (err) {
-            reject(err);
-          }
-        });
-      }
 
-      function runCommand(cmd) {
-        var slash = "/" + cmd;
-        copyText(slash).then(function () {
-          showCommandModal(slash, false);
-        }).catch(function () {
-          showCommandModal(slash, true);
-        });
-      }
+        function bindModalDismiss() {
+            modalCloseEl.addEventListener("click", dismissCommandModal);
+            modalEl.addEventListener("click", function (e) {
+                if (e.target === modalEl) dismissCommandModal();
+            });
+            window.addEventListener("scroll", dismissCommandModal, {passive: true});
+            window.addEventListener("touchmove", dismissCommandModal, {passive: true});
+        }
 
-      function openBotChat() {
+        function initBridge() {
+            try {
+                if (window.WebApp && typeof window.WebApp.ready === "function") {
+                    window.WebApp.ready();
+                }
+            } catch (e) { /* ignore */
+            }
+        }
+
+        function getUser() {
+            try {
+                if (window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.user) {
+                    return window.WebApp.initDataUnsafe.user;
+                }
+            } catch (e1) { /* ignore */
+            }
+            return null;
+        }
+
+        function isAdmin(userId, profileData) {
+            if (profileData && profileData.is_admin) return true;
+            var ids = CFG.adminMaxIds;
+            if (!userId || !Array.isArray(ids) || !ids.length) return false;
+            var uid = Number(userId);
+            for (var i = 0; i < ids.length; i++) {
+                if (Number(ids[i]) === uid) return true;
+            }
+            return false;
+        }
+
+        function showAdminBlock(user, profileData) {
+            if (isAdmin(user && user.id, profileData)) {
+                document.getElementById("admin-block").hidden = false;
+            }
+        }
+
+        function personalize(profileData) {
+            var user = getUser();
+            var greeting = document.getElementById("greeting");
+            var subtitle = document.getElementById("subtitle");
+            var avatar = document.getElementById("avatar");
+
+            if (user) {
+                var name = user.first_name || user.username || "друг";
+                greeting.textContent = "Привет, " + name + "!";
+                subtitle.textContent = user.username ? "@" + user.username : "StyleGenie AI · MAX";
+                if (user.photo_url) {
+                    avatar.innerHTML = "";
+                    var img = document.createElement("img");
+                    img.src = user.photo_url;
+                    img.alt = "";
+                    img.className = "avatar";
+                    img.style.width = "56px";
+                    img.style.height = "56px";
+                    avatar.replaceWith(img);
+                    img.id = "avatar";
+                }
+            }
+
+            showAdminBlock(user, profileData);
+        }
+
+        // function setupCtaButton(profileData) {
+        //   if (!ctaEl) return;
+        //   var bridge = window.StyleGenieBridge;
+        //   var hasApi = bridge && bridge.getInitData() && String(CFG.apiBaseUrl || "").trim();
+        //   if (!hasApi) {
+        //     ctaMode = "return";
+        //     ctaEl.textContent = "↩️ Вернуться в бота";
+        //     return;
+        //   }
+        //   if (profileData && profileData.can_continue) {
+        //     ctaMode = "continue";
+        //     ctaEl.textContent = "🎨 Продолжить образ";
+        //     return;
+        //   }
+        //   if (profileData && profileData.registered) {
+        //     ctaMode = "continue";
+        //     ctaEl.textContent = "🎨 Создать образ";
+        //     return;
+        //   }
+        //   ctaMode = "return";
+        //   ctaEl.textContent = "↩️ Вернуться в бота";
+        // }
+
+        function setupCtaButton(profileData) {
+            if (!ctaEl) return;
+
+            ctaMode = "return";
+            ctaEl.textContent = "↩️ Вернуться в бота";
+        }
+
+        function copyText(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+            return new Promise(function (resolve, reject) {
+                try {
+                    var ta = document.createElement("textarea");
+                    ta.value = text;
+                    ta.style.position = "fixed";
+                    ta.style.opacity = "0";
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(ta);
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        function runCommand(cmd) {
+            var slash = "/" + cmd;
+            copyText(slash).then(function () {
+                showCommandModal(slash, false);
+            }).catch(function () {
+                showCommandModal(slash, true);
+            });
+        }
+
+        function openBotChat() {
+            if (window.StyleGenieBridge) {
+                window.StyleGenieBridge.openBotChat();
+                return;
+            }
+            try {
+                if (window.WebApp && typeof window.WebApp.openMaxLink === "function") {
+                    window.WebApp.openMaxLink(BOT_LINK);
+                    return;
+                }
+                if (window.WebApp && typeof window.WebApp.openLink === "function") {
+                    window.WebApp.openLink(BOT_LINK);
+                    return;
+                }
+            } catch (e) { /* ignore */
+            }
+            runCommand("start");
+        }
+
+        function renderCommands(list, containerId, admin) {
+            var root = document.getElementById(containerId);
+            list.forEach(function (item) {
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "cmd" + (admin ? " admin" : "");
+                btn.innerHTML =
+                    '<span class="cmd-icon">' + item.icon + '</span>' +
+                    '<span class="cmd-body">' +
+                    '<span class="cmd-name">' + item.title + '</span>' +
+                    '<span class="cmd-desc">' + item.desc + '</span>' +
+                    '</span>' +
+                    '<span class="cmd-slash">/' + item.cmd + '</span>';
+                btn.addEventListener("click", function () {
+                    runCommand(item.cmd);
+                });
+                root.appendChild(btn);
+            });
+        }
+
+        function loadProfile() {
+            var pill = document.getElementById("balance-pill");
+            var bridge = window.StyleGenieBridge;
+            var user = getUser();
+            showAdminBlock(user, null);
+            if (!bridge || !bridge.fetchProfile) {
+                setupCtaButton(null);
+                personalize(null);
+                return;
+            }
+            bridge.fetchProfile().then(function (data) {
+                if (pill && data) {
+                    pill.textContent = `Баланс: ${Number(data.diamond_balance || 0)} 💎`;
+                }
+                setupCtaButton(data || null);
+                personalize(data || null);
+            }).catch(function () {
+                if (pill) pill.textContent = "Баланс 💎 — /profile";
+                setupCtaButton(null);
+                personalize(null);
+            });
+        }
+
+        function onCtaClick() {
+            if (!ctaEl) return;
+            ctaEl.disabled = true;
+            var bridge = window.StyleGenieBridge;
+            if (ctaMode === "return" || !bridge || !bridge.getInitData()) {
+                openBotChat();
+                ctaEl.disabled = false;
+                return;
+            }
+            bridge.triggerStartGeneration().then(function () {
+                setTimeout(function () {
+                    openBotChat();
+                }, 400);
+            }).catch(function () {
+                openBotChat();
+            }).finally(function () {
+                ctaEl.disabled = false;
+            });
+        }
+
+        initBridge();
         if (window.StyleGenieBridge) {
-          window.StyleGenieBridge.openBotChat();
-          return;
+            window.StyleGenieBridge.initBridge();
         }
-        try {
-          if (window.WebApp && typeof window.WebApp.openMaxLink === "function") {
-            window.WebApp.openMaxLink(BOT_LINK);
-            return;
-          }
-          if (window.WebApp && typeof window.WebApp.openLink === "function") {
-            window.WebApp.openLink(BOT_LINK);
-            return;
-          }
-        } catch (e) { /* ignore */ }
-        runCommand("start");
-      }
+        bindModalDismiss();
+        loadProfile();
+        renderCommands(USER_COMMANDS, "user-commands", false);
+        renderCommands(ADMIN_COMMANDS, "admin-commands", true);
 
-      function renderCommands(list, containerId, admin) {
-        var root = document.getElementById(containerId);
-        list.forEach(function (item) {
-          var btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "cmd" + (admin ? " admin" : "");
-          btn.innerHTML =
-            '<span class="cmd-icon">' + item.icon + '</span>' +
-            '<span class="cmd-body">' +
-              '<span class="cmd-name">' + item.title + '</span>' +
-              '<span class="cmd-desc">' + item.desc + '</span>' +
-            '</span>' +
-            '<span class="cmd-slash">/' + item.cmd + '</span>';
-          btn.addEventListener("click", function () { runCommand(item.cmd); });
-          root.appendChild(btn);
-        });
-      }
-
-      function loadProfile() {
-        var pill = document.getElementById("balance-pill");
-        var bridge = window.StyleGenieBridge;
-        var user = getUser();
-        showAdminBlock(user, null);
-        if (!bridge || !bridge.fetchProfile) {
-          setupCtaButton(null);
-          personalize(null);
-          return;
-        }
-        bridge.fetchProfile().then(function (data) {
-          if (pill && data) {
-            pill.textContent = "💎 Баланс: " + Number(data.diamond_balance || 0);
-          }
-          setupCtaButton(data || null);
-          personalize(data || null);
-        }).catch(function () {
-          if (pill) pill.textContent = "💎 Баланс — /profile";
-          setupCtaButton(null);
-          personalize(null);
-        });
-      }
-
-      function onCtaClick() {
-        if (!ctaEl) return;
-        ctaEl.disabled = true;
-        var bridge = window.StyleGenieBridge;
-        if (ctaMode === "return" || !bridge || !bridge.getInitData()) {
-          openBotChat();
-          ctaEl.disabled = false;
-          return;
-        }
-        bridge.triggerStartGeneration().then(function () {
-          setTimeout(function () {
-            openBotChat();
-          }, 400);
-        }).catch(function () {
-          openBotChat();
-        }).finally(function () {
-          ctaEl.disabled = false;
-        });
-      }
-
-      initBridge();
-      if (window.StyleGenieBridge) {
-        window.StyleGenieBridge.initBridge();
-      }
-      bindModalDismiss();
-      loadProfile();
-      renderCommands(USER_COMMANDS, "user-commands", false);
-      renderCommands(ADMIN_COMMANDS, "admin-commands", true);
-
-      ctaEl.addEventListener("click", onCtaClick);
+        ctaEl.addEventListener("click", onCtaClick);
     })();
-  </script>
+</script>
 </body>
 </html>
