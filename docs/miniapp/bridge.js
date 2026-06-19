@@ -103,6 +103,16 @@
     global.location.href = link;
   }
 
+  function closeMiniApp() {
+    try {
+      if (global.WebApp && typeof global.WebApp.close === "function") {
+        global.WebApp.close();
+        return true;
+      }
+    } catch (e) { /* ignore */ }
+    return false;
+  }
+
   global.StyleGenieBridge = {
     initBridge: initBridge,
     getInitData: getInitData,
@@ -110,6 +120,7 @@
     fetchProfile: fetchProfile,
     triggerStartGeneration: triggerStartGeneration,
     openBotChat: openBotChat,
+    closeMiniApp: closeMiniApp,
     miniappRoot: miniappRoot,
   };
 })(window);

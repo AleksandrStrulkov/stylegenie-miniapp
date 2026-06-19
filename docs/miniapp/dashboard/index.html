@@ -153,7 +153,6 @@
             border: 2px solid transparent;
             background: linear-gradient(135deg, var(--accent), var(--accent-2)) border-box;
             -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-            /*-webkit-mask: linear-gradient(#fff, #fff) padding-box, linear-gradient(#fff, #fff);*/
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
@@ -173,31 +172,12 @@
             line-height: 1.35;
         }
 
-        /*.status-row {*/
-        /*    display: flex;*/
-        /*    flex-wrap: wrap;*/
-        /*    gap: 8px;*/
-        /*    margin-top: 14px;*/
-        /*}*/
-
         .status-row {
-            display: flex; /* Включаем гибкий контейнер */
-            gap: 8px; /* Расстояние между кнопками */
-            margin-top: 14px; /* Отступ сверху */
-            width: 100%; /* Чтобы ряд занимал всю ширину */
+            display: flex; /* Чтобы плашки встали в ряд */
+            gap: 8px; /* Расстояние между ними */
+            width: 100%; /* Чтобы ряд растянулся на всю ширину карточки */
+            margin-top: 14px;
         }
-
-        /*.pill {*/
-        /*    display: inline-flex;*/
-        /*    align-items: center;*/
-        /*    gap: 6px;*/
-        /*    padding: 6px 12px;*/
-        /*    border-radius: 999px;*/
-        /*    font-size: 0.78rem;*/
-        /*    font-weight: 600;*/
-        /*    background: rgba(255, 255, 255, 0.07);*/
-        /*    border: 1px solid rgba(255, 255, 255, 0.1);*/
-        /*}*/
 
         .pill {
             flex: 1; /* Главное: делим место поровну */
@@ -497,7 +477,7 @@
         </div>
         <div class="status-row">
             <span class="pill"><span class="pill-dot"></span> Статус: Активен</span>
-            <span class="pill pill-diamond" id="balance-pill">Баланс — /profile</span>
+            <span class="pill pill-diamond" id="balance-pill">💎 Баланс — /profile</span>
         </div>
         <button type="button" class="cta" id="cta-create">🎨 Создать образ</button>
     </header>
@@ -565,15 +545,19 @@
             modalEl.hidden = true;
         }
 
-        // function showCommandModal(slash, copyFailed) {
-        //     modalCmdEl.textContent = slash;
-        //     modalTextEl.textContent = copyFailed
-        //         ? "Скопируйте команду вручную и вставьте в чат с ботом"
-        //         : (slash + " скопировано — вставьте в чат с ботом");
-        //     modalEl.hidden = false;
-        //     modalEl.classList.add("show");
-        //     modalOpen = true;
-        // }
+        function closeMiniAppAfterCommand() {
+            dismissCommandModal();
+            if (window.StyleGenieBridge && typeof window.StyleGenieBridge.closeMiniApp === "function") {
+                window.StyleGenieBridge.closeMiniApp();
+                return;
+            }
+            try {
+                if (window.WebApp && typeof window.WebApp.close === "function") {
+                    window.WebApp.close();
+                }
+            } catch (e) { /* ignore */
+            }
+        }
 
         function showCommandModal(slash, copyFailed) {
             modalCmdEl.textContent = slash;
@@ -589,7 +573,7 @@
         }
 
         function bindModalDismiss() {
-            modalCloseEl.addEventListener("click", dismissCommandModal);
+            modalCloseEl.addEventListener("click", closeMiniAppAfterCommand);
             modalEl.addEventListener("click", function (e) {
                 if (e.target === modalEl) dismissCommandModal();
             });
@@ -659,32 +643,25 @@
             showAdminBlock(user, profileData);
         }
 
-        // function setupCtaButton(profileData) {
-        //   if (!ctaEl) return;
-        //   var bridge = window.StyleGenieBridge;
-        //   var hasApi = bridge && bridge.getInitData() && String(CFG.apiBaseUrl || "").trim();
-        //   if (!hasApi) {
-        //     ctaMode = "return";
-        //     ctaEl.textContent = "↩️ Вернуться в бота";
-        //     return;
-        //   }
-        //   if (profileData && profileData.can_continue) {
-        //     ctaMode = "continue";
-        //     ctaEl.textContent = "🎨 Продолжить образ";
-        //     return;
-        //   }
-        //   if (profileData && profileData.registered) {
-        //     ctaMode = "continue";
-        //     ctaEl.textContent = "🎨 Создать образ";
-        //     return;
-        //   }
-        //   ctaMode = "return";
-        //   ctaEl.textContent = "↩️ Вернуться в бота";
-        // }
-
         function setupCtaButton(profileData) {
             if (!ctaEl) return;
-
+            var bridge = window.StyleGenieBridge;
+            var hasApi = bridge && bridge.getInitData() && String(CFG.apiBaseUrl || "").trim();
+            if (!hasApi) {
+                ctaMode = "return";
+                ctaEl.textContent = "↩️ Вернуться в бота";
+                return;
+            }
+            if (profileData && profileData.can_continue) {
+                ctaMode = "continue";
+                ctaEl.textContent = "🎨 Продолжить образ";
+                return;
+            }
+            if (profileData && profileData.registered) {
+                ctaMode = "continue";
+                ctaEl.textContent = "🎨 Создать образ";
+                return;
+            }
             ctaMode = "return";
             ctaEl.textContent = "↩️ Вернуться в бота";
         }
@@ -775,7 +752,7 @@
                 setupCtaButton(data || null);
                 personalize(data || null);
             }).catch(function () {
-                if (pill) pill.textContent = "Баланс 💎 — /profile";
+                if (pill) pill.textContent = "💎 Баланс — /profile";
                 setupCtaButton(null);
                 personalize(null);
             });
