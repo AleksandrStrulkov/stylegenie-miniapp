@@ -1,0 +1,135 @@
+# Публикация юридических документов и Mini App legal на GitHub Pages.
+# Один HTML (docs/miniapp/legal/index.html) + три .md; документ выбирается ?doc=terms|privacy|consent
+#
+# В репозитории: Settings → Pages → Source: GitHub Actions
+# WEBAPP_BASE_URL в боте: https://<user>.github.io/<repo>/
+# Корень Mini App (MAX + deep link payload): docs/index.html → dashboard по умолчанию
+name: Deploy legal docs to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/index.html"
+      - "docs/documents/**"
+      - "docs/miniapp/legal/**"
+      - "docs/miniapp/models/**"
+      - "docs/miniapp/quality/**"
+      - "docs/miniapp/embedded_html.js"
+      - "docs/miniapp/miniapp.runtime.js"
+      - "scripts/build_miniapp_bundle.py"
+      - "docs/miniapp/miniapp.css"
+      - "docs/miniapp/vendor/**"
+      - "docs/.nojekyll"
+      - "miniapp/legal/**"
+      - "miniapp/models/**"
+      - "miniapp/quality/**"
+      - "miniapp/dashboard/**"
+      - "miniapp/gallery/**"
+      - "docs/miniapp/dashboard/**"
+      - "docs/miniapp/bridge.js"
+      - "docs/miniapp/miniapp-content.css"
+      - "docs/miniapp/legal/terms.html"
+      - "docs/miniapp/legal/privacy.html"
+      - "docs/miniapp/legal/consent.html"
+      - "docs/miniapp/miniapp.js"
+      - "docs/miniapp/gallery/**"
+      - ".github/workflows/github-pages-legal.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages-legal
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Mini App HTML bundle
+        run: |
+          python -m pip install --disable-pip-version-check markdown
+          python scripts/build_miniapp_bundle.py
+
+      - name: Sync miniapp HTML into docs (if present in repo root)
+        run: |
+          set -e
+          if [ -f miniapp/legal/index.html ]; then
+            mkdir -p docs/miniapp/legal
+            cp -f miniapp/legal/index.html docs/miniapp/legal/index.html
+            echo "Synced miniapp/legal/index.html → docs/miniapp/legal/"
+          fi
+          if [ -f miniapp/dashboard/index.html ]; then
+            mkdir -p docs/miniapp/dashboard
+            cp -f miniapp/dashboard/index.html docs/miniapp/dashboard/index.html
+            cp -f miniapp/dashboard/dashboard-config.js docs/miniapp/dashboard/dashboard-config.js 2>/dev/null || true
+            echo "Synced miniapp/dashboard/ → docs/miniapp/dashboard/"
+          fi
+          if [ -f miniapp/gallery/index.html ]; then
+            mkdir -p docs/miniapp/gallery
+            cp -f miniapp/gallery/index.html docs/miniapp/gallery/index.html
+            echo "Synced miniapp/gallery/index.html → docs/miniapp/gallery/"
+          fi
+          if [ -f miniapp/models/index.html ]; then
+            mkdir -p docs/miniapp/models
+            cp -f miniapp/models/index.html docs/miniapp/models/index.html
+            echo "Synced miniapp/models/index.html → docs/miniapp/models/"
+          fi
+          if [ -f miniapp/quality/index.html ]; then
+            mkdir -p docs/miniapp/quality
+            cp -f miniapp/quality/index.html docs/miniapp/quality/index.html
+            echo "Synced miniapp/quality/index.html → docs/miniapp/quality/"
+          fi
+
+      - name: Verify legal Pages artifact
+        run: |
+          set -e
+          test -f docs/.nojekyll || touch docs/.nojekyll
+          test -f docs/miniapp/legal/index.html || (
+            echo "Missing docs/miniapp/legal/index.html"
+            exit 1
+          )
+          test -f docs/miniapp/embedded_html.js || (
+            echo "Missing docs/miniapp/embedded_html.js — run scripts/build_miniapp_bundle.py"
+            exit 1
+          )
+          test -f docs/miniapp/miniapp.runtime.js || (
+            echo "Missing docs/miniapp/miniapp.runtime.js"
+            exit 1
+          )
+          test -f docs/miniapp/vendor/marked.min.js || true
+          for f in public_offer.md policy_personal.md consent_personal.md; do
+            test -f "docs/documents/$f" || (
+              echo "Missing docs/documents/$f"
+              exit 1
+            )
+          done
+          echo "Legal documents OK:"
+          ls -la docs/documents/*.md
+          echo "Mini App legal: docs/miniapp/legal/index.html"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
