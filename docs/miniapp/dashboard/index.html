@@ -516,6 +516,7 @@
             {cmd: "history", icon: "📚", title: "История генераций", desc: "Ваши прошлые образы"},
             {cmd: "profile", icon: "👤", title: "Данные профиля", desc: "Модель, формат кадра, настройки"},
             {cmd: "buy", icon: "💎", title: "Пополнить баланс", desc: "Купить генерации 💎"},
+            {cmd: "tariffs", icon: "💰", title: "Текущие тарифы", desc: "Пакеты и стоимость генераций"},
             {cmd: "referrals", icon: "🤝", title: "Реферальная программа", desc: "Пригласи друзей"},
             {cmd: "support", icon: "💬", title: "Обращение в поддержку", desc: "Написать в поддержку"},
             {cmd: "reviews", icon: "⭐", title: "Канал отзывов", desc: "Посмотреть отзывы"},
@@ -561,12 +562,9 @@
 
         function showCommandModal(slash, copyFailed) {
             modalCmdEl.textContent = slash;
-
-            // Оставляем только чистый текст без повтора команды
             modalTextEl.textContent = copyFailed
                 ? "Скопируйте команду вручную и вставьте в чат с ботом"
-                : "вставьте в чат с ботом";
-
+                : (slash + " скопировано — вставьте в чат с ботом");
             modalEl.hidden = false;
             modalEl.classList.add("show");
             modalOpen = true;
@@ -747,7 +745,7 @@
             }
             bridge.fetchProfile().then(function (data) {
                 if (pill && data) {
-                    pill.textContent = `Баланс: ${Number(data.diamond_balance || 0)} 💎`;
+                    pill.textContent = "💎 Баланс: " + Number(data.diamond_balance || 0);
                 }
                 setupCtaButton(data || null);
                 personalize(data || null);
