@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://st.max.ru/js/max-web-app.js"></script>
-  <script src="../bridge.js?v=6"></script>
-  <script src="dashboard-config.js?v=6"></script>
+  <script src="../bridge.js?v=7"></script>
+  <script src="dashboard-config.js?v=7"></script>
   <style>
     :root {
       --bg-0: #06060c;
@@ -143,19 +143,25 @@
 
     .status-row {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 8px;
       margin-top: 14px;
+      width: 100%;
     }
 
     .pill {
+      flex: 1 1 0;
+      min-width: 0;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      padding: 6px 12px;
+      padding: 8px 12px;
       border-radius: 999px;
       font-size: 0.78rem;
       font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -163,6 +169,7 @@
     .pill-dot {
       width: 7px;
       height: 7px;
+      flex-shrink: 0;
       border-radius: 50%;
       background: var(--success);
       box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
