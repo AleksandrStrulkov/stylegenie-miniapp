@@ -14,7 +14,7 @@
     (function () {
       "use strict";
 
-      var BUNDLE_V = "5";
+      var BUNDLE_V = "6";
       var contentEl = document.getElementById("content");
 
       var ROUTE_ALIASES = {
@@ -97,7 +97,10 @@
       }
 
       function goDashboard() {
-        window.location.replace("miniapp/dashboard/");
+        // Сохраняем #WebAppData=... — иначе после replace initData на дашборде пустой
+        // и баланс /profile не подтягивается.
+        var hash = window.location.hash || "";
+        window.location.replace("miniapp/dashboard/" + hash);
       }
 
       function loadBundle(onReady) {

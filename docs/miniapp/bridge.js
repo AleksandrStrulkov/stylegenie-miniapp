@@ -13,13 +13,52 @@
     } catch (e) { /* ignore */ }
   }
 
+  function getInitDataFromHash() {
+    try {
+      var hash = String(global.location.hash || "").replace(/^#/, "");
+      if (!hash) return "";
+      var params = new URLSearchParams(hash);
+      var fromWebAppData = params.get("WebAppData");
+      if (fromWebAppData) return String(fromWebAppData);
+      // Иногда MAX кладёт пары сразу в fragment без обёртки WebAppData
+      if (params.get("hash") && (params.get("auth_date") || params.get("user"))) {
+        return hash;
+      }
+    } catch (e) { /* ignore */ }
+    return "";
+  }
+
   function getInitData() {
     try {
       if (global.WebApp && global.WebApp.initData) {
         return String(global.WebApp.initData);
       }
     } catch (e1) { /* ignore */ }
-    return "";
+    try {
+      var tg = global.Telegram && global.Telegram.WebApp;
+      if (tg && tg.initData) return String(tg.initData);
+    } catch (e2) { /* ignore */ }
+    return getInitDataFromHash();
+  }
+
+  function waitForInitData(timeoutMs) {
+    var limit = typeof timeoutMs === "number" ? timeoutMs : 4000;
+    var started = Date.now();
+    return new Promise(function (resolve) {
+      function tick() {
+        var data = getInitData();
+        if (data) {
+          resolve(data);
+          return;
+        }
+        if (Date.now() - started >= limit) {
+          resolve("");
+          return;
+        }
+        setTimeout(tick, 80);
+      }
+      tick();
+    });
   }
 
   function miniappRoot() {
@@ -58,33 +97,41 @@
 
   function fetchProfile() {
     var url = apiUrl("profile");
-    var initData = getInitData();
-    if (!url || !initData) {
+    if (!url) {
       return Promise.resolve(null);
     }
-    return fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ init_data: initData }),
-    }).then(function (response) {
-      if (!response.ok) throw new Error("profile " + response.status);
-      return response.json();
+    return waitForInitData(4000).then(function (initData) {
+      if (!initData) {
+        return null;
+      }
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ init_data: initData }),
+      }).then(function (response) {
+        if (!response.ok) throw new Error("profile " + response.status);
+        return response.json();
+      });
     });
   }
 
   function triggerStartGeneration() {
     var url = apiUrl("actions/start-generation");
-    var initData = getInitData();
-    if (!url || !initData) {
+    if (!url) {
       return Promise.reject(new Error("api unavailable"));
     }
-    return fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ init_data: initData }),
-    }).then(function (response) {
-      if (!response.ok) throw new Error("action " + response.status);
-      return response.json();
+    return waitForInitData(4000).then(function (initData) {
+      if (!initData) {
+        return Promise.reject(new Error("initData unavailable"));
+      }
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ init_data: initData }),
+      }).then(function (response) {
+        if (!response.ok) throw new Error("action " + response.status);
+        return response.json();
+      });
     });
   }
 
@@ -116,6 +163,7 @@
   global.StyleGenieBridge = {
     initBridge: initBridge,
     getInitData: getInitData,
+    waitForInitData: waitForInitData,
     navigate: navigate,
     fetchProfile: fetchProfile,
     triggerStartGeneration: triggerStartGeneration,

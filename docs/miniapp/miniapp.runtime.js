@@ -123,7 +123,7 @@
       if (root.indexOf("/miniapp/") >= 0) {
         root = root.slice(0, root.indexOf("/miniapp/") + 1);
       }
-      global.location.replace(root + "miniapp/gallery/");
+      global.location.replace(root + "miniapp/gallery/" + (global.location.hash || ""));
       return;
     }
     if (route === "dashboard") {
@@ -131,7 +131,9 @@
       if (dashRoot.indexOf("/miniapp/") >= 0) {
         dashRoot = dashRoot.slice(0, dashRoot.indexOf("/miniapp/") + 1);
       }
-      global.location.replace(dashRoot + "miniapp/dashboard/");
+      global.location.replace(
+        dashRoot + "miniapp/dashboard/" + (global.location.hash || "")
+      );
       return;
     }
     var data = routes()[route];
